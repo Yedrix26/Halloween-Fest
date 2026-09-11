@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Admin - Halloween Fest</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #050505;
+            color: white;
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .boleto {
+            background: #151515;
+            border: 1px solid #333;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 500px;
+        }
+
+        .boleto h2 {
+            margin-top: 0;
+        }
+
+        .boleto p {
+            margin: 8px 0;
+        }
+
+        button {
+            background: #ff5e00;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .vacio {
+            text-align: center;
+            color: #aaa;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🎃 ADMIN — HALLOWEEN FEST</h1>
+
+    <div id="listaBoletos">
+        Cargando boletos...
+    </div>
+
+
+    <!-- SUPABASE -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+
+
+    <script>
+
+        // CONEXIÓN CON SUPABASE
+
+        const supabaseClient = supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
+        );
+
+
+        // CARGAR BOLETOS PENDIENTES
+
+        async function cargarBoletos() {
+
+            const { data, error } = await supabaseClient
+                .from("Boletos")
+                .select("*")
+                .eq("Estado", "Pendiente")
+                .order("id", { ascending: false });
+
+
+            if (error) {
+
+                console.error(
+                    "ERROR AL CARGAR BOLETOS:",
+                    error
+                );
+
+                document.getElementById("listaBoletos").innerHTML =
+                    "<p class='vacio'>❌ Error al cargar los boletos.</p>";
+
+                return;
+            }
+
+
+            const lista =
+                document.getElementById("listaBoletos");
+
+
+            // NO HAY PENDIENTES
+
+            if (!data || data.length === 0) {
+
+                lista.innerHTML =
+                    "<p class='vacio'>No hay pagos pendientes. ✅</p>";
+
+                return;
+            }
+
+
+            // LIMPIAR LISTA
+
+            lista.innerHTML = "";
+
+
+            // MOSTRAR BOLETOS
+
+            data.forEach(boleto => {
+
+                const div =
+                    document.createElement("div");
+
+                div.className = "boleto";
+
+
+                div.innerHTML = `
+
+                    <h2>
+                        🎟️ Boleto #${boleto.id}
+                    </h2>
+
+                    <p>
+                        <strong>Nombre:</strong>
+                        ${boleto.Nombre}
+                    </p>
+
+                    <p>
+                        <strong>Correo:</strong>
+                        ${boleto.Correo}
+                    </p>
+
+                    <p>
+                        <strong>Teléfono:</strong>
+                        ${boleto.Telefono}
+                    </p>
+
+                    <p>
+                        <strong>Cantidad:</strong>
+                        ${boleto.Cantidad}
+                    </p>
+
+                    <p>
+                        <strong>Total:</strong>
+                        $${boleto.Total} MXN
+                    </p>
+
+                    <p>
+                        <strong>Referencia:</strong>
+                        ${boleto.Referencia}
+                    </p>
+
+                    <p>
+                        <strong>Estado:</strong>
+                        ${boleto.Estado}
+                    </p>
+
+                    <button
+                        onclick="autorizar(${boleto.id})"
+                    >
+                        ✅ AUTORIZAR PAGO
+                    </button>
+
+                `;
+
+
+                lista.appendChild(div);
+
+            });
+
+        }
+
+
+
+        // AUTORIZAR PAGO
+
+        async function autorizar(id) {
+
+
+            const confirmar = confirm(
+                "¿Confirmaste que este pago ya fue recibido?"
+            );
+
+
+            if (!confirmar) {
+                return;
+            }
+
+
+
+            // BUSCAR EL BOLETO
+
+            const {
+                data: boleto,
+                error: errorBusqueda
+            } = await supabaseClient
+
+                .from("Boletos")
+
+                .select("*")
+
+                .eq("id", id)
+
+                .single();
+
+
+
+            if (errorBusqueda || !boleto) {
+
+                console.error(
+                    "ERROR AL BUSCAR BOLETO:",
+                    errorBusqueda
+                );
+
+                alert(
+                    "❌ No se pudo encontrar el boleto."
+                );
+
+                return;
+            }
+
+
+
+            // CAMBIAR ESTADO A CONFIRMADO
+
+            const {
+                error
+            } = await supabaseClient
+
+                .from("Boletos")
+
+                .update({
+                    Estado: "Confirmado"
+                })
+
+                .eq("id", id);
+
+
+
+            if (error) {
+
+                console.error(
+                    "ERROR AL CONFIRMAR:",
+                    error
+                );
+
+                alert(
+                    "❌ Error al autorizar el pago."
+                );
+
+                return;
+            }
+
+
+
+            // ENLACE AL BOLETO
+
+            const boletoUrl =
+                window.location.origin +
+                "/ticket.html?id=" +
+                id;
+
+
+
+            // LIMPIAR TELÉFONO
+
+            const telefono =
+                String(boleto.Telefono)
+                    .replace(/\D/g, "");
+
+
+
+            // MENSAJE DE WHATSAPP
+
+            const mensaje =
+                "🎃 ¡Tu boleto para Halloween Fest está confirmado!%0A%0A" +
+
+                "🎟️ Boleto #" +
+                id +
+                "%0A%0A" +
+
+                "Aquí puedes abrir tu boleto y mostrar tu QR en la entrada:%0A" +
+
+                boletoUrl;
+
+
+
+            // ABRIR WHATSAPP
+
+            window.open(
+                "https://wa.me/52" +
+                telefono +
+                "?text=" +
+                mensaje,
+                "_blank"
+            );
+
+
+
+            // ACTUALIZAR PANEL
+
+            cargarBoletos();
+
+        }
+
+
+
+        // CARGAR AL ABRIR LA PÁGINA
+
+        cargarBoletos();
+
+    </script>
+
+</body>
+</html>

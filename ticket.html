@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Tu boleto - Halloween Fest</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #050505;
+            color: white;
+            text-align: center;
+            padding: 30px 15px;
+        }
+
+        .ticket {
+            max-width: 500px;
+            margin: auto;
+            background: #151515;
+            border: 2px solid #ff5e00;
+            border-radius: 20px;
+            padding: 30px 20px;
+            box-shadow: 0 0 30px #ff5e00;
+        }
+
+        h1 {
+            font-size: 38px;
+            margin-bottom: 10px;
+        }
+
+        .confirmado {
+            color: #00ff88;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        #qrcode {
+            background: white;
+            padding: 15px;
+            width: fit-content;
+            margin: 25px auto;
+            border-radius: 10px;
+        }
+
+        .dato {
+            margin: 12px 0;
+            font-size: 18px;
+        }
+
+        .aviso {
+            margin-top: 25px;
+            color: #ccc;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="ticket">
+
+        <h1>🎃 HALLOWEEN FEST</h1>
+
+        <p class="confirmado">
+            ✅ BOLETO CONFIRMADO
+        </p>
+
+        <div id="qrcode"></div>
+
+        <div class="dato">
+            <strong>ID:</strong>
+            <span id="idBoleto"></span>
+        </div>
+
+        <div class="dato">
+            <strong>Nombre:</strong>
+            <span id="nombre"></span>
+        </div>
+
+        <div class="dato">
+            <strong>Boletos:</strong>
+            <span id="cantidad"></span>
+        </div>
+
+        <div class="dato">
+            <strong>Total:</strong>
+            $<span id="total"></span> MXN
+        </div>
+
+        <p class="aviso">
+            📱 Presenta este QR en la entrada.
+        </p>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="config.js"></script>
+
+    <script>
+
+        const supabaseClient = supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
+        );
+
+        async function cargarBoleto() {
+
+            const parametros = new URLSearchParams(
+                window.location.search
+            );
+
+            const id = parametros.get("id");
+
+            if (!id) {
+                document.body.innerHTML =
+                    "<h1>❌ Boleto no encontrado</h1>";
+                return;
+            }
+
+            const { data, error } = await supabaseClient
+                .from("Boletos")
+                .select("*")
+                .eq("id", id)
+                .eq("Estado", "Confirmado")
+                .single();
+
+            if (error || !data) {
+
+                document.body.innerHTML =
+                    "<h1>❌ Boleto no válido o no confirmado</h1>";
+
+                return;
+            }
+
+            document.getElementById("idBoleto").textContent =
+                data.id;
+
+            document.getElementById("nombre").textContent =
+                data.Nombre;
+
+            document.getElementById("cantidad").textContent =
+                data.Cantidad;
+
+            document.getElementById("total").textContent =
+                data.Total;
+
+
+            const urlValidacion =
+                window.location.origin +
+                "/validar.html?id=" +
+                data.id;
+
+
+            new QRCode(
+                document.getElementById("qrcode"),
+                {
+                    text: urlValidacion,
+                    width: 220,
+                    height: 220
+                }
+            );
+
+        }
+
+        cargarBoleto();
+
+    </script>
+
+</body>
+</html>
