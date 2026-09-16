@@ -408,7 +408,7 @@ async function actualizarDisponibles() {
 }
 
 actualizarDisponibles();
-
+actualizarTotal();
         // Cambiar cantidad
 
         function cambiarCantidad(numero) {
@@ -431,15 +431,28 @@ actualizarDisponibles();
 
         // Actualizar total
 
-        function actualizarTotal() {
+        async function actualizarTotal() {
 
-            const precio = 100;
+    const { data, error } = await supabaseClient
+        .rpc("calcular_precio");
 
-            const total = cantidad * precio;
+    if (error) {
 
-            document.getElementById("total").textContent = total;
-        }
+        console.error(
+            "ERROR AL CALCULAR PRECIO:",
+            error
+        );
 
+        return;
+    }
+
+    const precio = Number(data);
+
+    const total = cantidad * precio;
+
+    document.getElementById("total").textContent =
+        total;
+}
 
         // Guardar boleto
 
