@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Validar boleto - Halloween Fest</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #050505;
+            color: white;
+            text-align: center;
+            padding: 30px 15px;
+        }
+
+        .contenedor {
+            max-width: 500px;
+            margin: 50px auto;
+            background: #151515;
+            border-radius: 20px;
+            padding: 30px 20px;
+            border: 2px solid #ff5e00;
+        }
+
+        h1 {
+            margin-bottom: 25px;
+        }
+
+        #resultado {
+            font-size: 22px;
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .valido {
+            background: #123d25;
+            border: 1px solid #00ff88;
+        }
+
+        .invalido {
+            background: #3d1212;
+            border: 1px solid #ff4444;
+        }
+
+        .dato {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="contenedor">
+
+        <h1>🎃 HALLOWEEN FEST</h1>
+
+        <h2>🔎 Validación de boleto</h2>
+
+        <div id="resultado">
+            Verificando boleto...
+        </div>
+
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+
+    <script>
+
+        const supabaseClient = supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
+        );
+
+
+        async function validarBoleto() {
+
+            const parametros =
+                new URLSearchParams(window.location.search);
+
+            const id =
+                parametros.get("id");
+
+
+            if (!id) {
+
+                mostrarError(
+                    "❌ No se encontró el ID del boleto."
+                );
+
+                return;
+            }
+
+
+            const { data, error } =
+                await supabaseClient
+
+                    .from("Boletos")
+
+                    .select("*")
+
+                    .eq("id", id)
+
+                    .single();
+
+
+            if (error || !data) {
+
+                console.error(error);
+
+                mostrarError(
+                    "❌ BOLETO NO VÁLIDO"
+                );
+
+                return;
+            }
+
+
+            if (data.Estado !== "Confirmado") {
+
+                mostrarError(
+                    "❌ BOLETO NO CONFIRMADO"
+                );
+
+                return;
+            }
+
+
+            mostrarValido(data);
+
+        }
+
+
+
+        function mostrarValido(boleto) {
+
+            const resultado =
+                document.getElementById("resultado");
+
+
+            resultado.className = "valido";
+
+
+            resultado.innerHTML = `
+
+                <h2>✅ BOLETO VÁLIDO</h2>
+
+                <div class="dato">
+                    <strong>Boleto:</strong>
+                    #${boleto.id}
+                </div>
+
+                <div class="dato">
+                    <strong>Nombre:</strong>
+                    ${boleto.Nombre}
+                </div>
+
+                <div class="dato">
+                    <strong>Boletos:</strong>
+                    ${boleto.Cantidad}
+                </div>
+
+                <p style="margin-top:20px;">
+                    🎃 ¡Bienvenido a Halloween Fest!
+                </p>
+
+            `;
+
+        }
+
+
+
+        function mostrarError(mensaje) {
+
+            const resultado =
+                document.getElementById("resultado");
+
+
+            resultado.className = "invalido";
+
+
+            resultado.innerHTML = `
+
+                <h2>${mensaje}</h2>
+
+                <p style="margin-top:15px;">
+                    Verifica el boleto antes de permitir la entrada.
+                </p>
+
+            `;
+
+        }
+
+
+        validarBoleto();
+
+    </script>
+
+</body>
+</html>

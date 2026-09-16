@@ -280,9 +280,10 @@
             // ENLACE AL BOLETO
 
             const boletoUrl =
-                window.location.origin +
-                "/ticket.html?id=" +
-                id;
+    new URL(
+        "ticket.html?id=" + id,
+        window.location.href
+    ).href;
 
 
 
