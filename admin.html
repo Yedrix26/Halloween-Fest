@@ -19,6 +19,7 @@
             margin-bottom: 30px;
         }
 
+        .login,
         .boleto {
             background: #151515;
             border: 1px solid #333;
@@ -28,12 +29,13 @@
             max-width: 500px;
         }
 
-        .boleto h2 {
-            margin-top: 0;
-        }
-
-        .boleto p {
-            margin: 8px 0;
+        input {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
         }
 
         button {
@@ -44,16 +46,15 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
+        }
+
+        .error {
+            color: #ff5555;
             margin-top: 15px;
         }
 
-        button:hover {
-            opacity: 0.9;
-        }
-
-        .vacio {
-            text-align: center;
-            color: #aaa;
+        .boleto p {
+            margin: 8px 0;
         }
     </style>
 </head>
@@ -62,12 +63,50 @@
 
     <h1>🎃 ADMIN — HALLOWEEN FEST</h1>
 
-    <div id="listaBoletos">
-        Cargando boletos...
+
+    <!-- LOGIN -->
+
+    <div class="login" id="login">
+
+        <h2>🔐 Acceso administrador</h2>
+
+        <br>
+
+        <input
+            id="email"
+            type="email"
+            placeholder="Correo"
+        >
+
+        <input
+            id="password"
+            type="password"
+            placeholder="Contraseña"
+        >
+
+        <button onclick="iniciarSesion()">
+            🔑 ENTRAR
+        </button>
+
+        <p id="errorLogin" class="error"></p>
+
     </div>
 
 
-    <!-- SUPABASE -->
+    <!-- PANEL -->
+
+    <div id="panel" style="display:none;">
+
+        <button onclick="cerrarSesion()">
+            🚪 CERRAR SESIÓN
+        </button>
+
+        <div id="listaBoletos">
+            Cargando boletos...
+        </div>
+
+    </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
@@ -75,34 +114,87 @@
 
     <script>
 
-        // CONEXIÓN CON SUPABASE
+        const supabaseClient =
+            supabase.createClient(
+                SUPABASE_URL,
+                SUPABASE_KEY
+            );
 
-        const supabaseClient = supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_KEY
-        );
+
+        // INICIAR SESIÓN
+
+        async function iniciarSesion() {
+
+            const email =
+                document.getElementById("email").value.trim();
+
+            const password =
+                document.getElementById("password").value;
+
+
+            if (!email || !password) {
+
+                document.getElementById("errorLogin").textContent =
+                    "Completa correo y contraseña.";
+
+                return;
+            }
+
+
+            const { data, error } =
+                await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+
+            if (error) {
+
+                console.error(error);
+
+                document.getElementById("errorLogin").textContent =
+                    "❌ Correo o contraseña incorrectos.";
+
+                return;
+            }
+
+
+            document.getElementById("login").style.display =
+                "none";
+
+            document.getElementById("panel").style.display =
+                "block";
+
+
+            cargarBoletos();
+
+        }
 
 
         // CARGAR BOLETOS PENDIENTES
 
         async function cargarBoletos() {
 
-            const { data, error } = await supabaseClient
-                .from("Boletos")
-                .select("*")
-                .eq("Estado", "Pendiente")
-                .order("id", { ascending: false });
+            const { data, error } =
+                await supabaseClient
+
+                    .from("Boletos")
+
+                    .select("*")
+
+                    .eq("Estado", "Pendiente")
+
+                    .order("id", {
+                        ascending: false
+                    });
 
 
             if (error) {
 
-                console.error(
-                    "ERROR AL CARGAR BOLETOS:",
-                    error
-                );
+                console.error(error);
 
                 document.getElementById("listaBoletos").innerHTML =
-                    "<p class='vacio'>❌ Error al cargar los boletos.</p>";
+                    "<p>❌ Error al cargar boletos.</p>";
 
                 return;
             }
@@ -112,23 +204,17 @@
                 document.getElementById("listaBoletos");
 
 
-            // NO HAY PENDIENTES
-
             if (!data || data.length === 0) {
 
                 lista.innerHTML =
-                    "<p class='vacio'>No hay pagos pendientes. ✅</p>";
+                    "<p>✅ No hay pagos pendientes.</p>";
 
                 return;
             }
 
 
-            // LIMPIAR LISTA
-
             lista.innerHTML = "";
 
-
-            // MOSTRAR BOLETOS
 
             data.forEach(boleto => {
 
@@ -179,9 +265,7 @@
                         ${boleto.Estado}
                     </p>
 
-                    <button
-                        onclick="autorizar(${boleto.id})"
-                    >
+                    <button onclick="autorizar(${boleto.id})">
                         ✅ AUTORIZAR PAGO
                     </button>
 
@@ -195,24 +279,20 @@
         }
 
 
-
         // AUTORIZAR PAGO
 
         async function autorizar(id) {
 
-
-            const confirmar = confirm(
-                "¿Confirmaste que este pago ya fue recibido?"
-            );
+            const confirmar =
+                confirm(
+                    "¿Confirmaste que este pago ya fue recibido?"
+                );
 
 
             if (!confirmar) {
                 return;
             }
 
-
-
-            // BUSCAR EL BOLETO
 
             const {
                 data: boleto,
@@ -228,13 +308,7 @@
                 .single();
 
 
-
             if (errorBusqueda || !boleto) {
-
-                console.error(
-                    "ERROR AL BUSCAR BOLETO:",
-                    errorBusqueda
-                );
 
                 alert(
                     "❌ No se pudo encontrar el boleto."
@@ -243,9 +317,6 @@
                 return;
             }
 
-
-
-            // CAMBIAR ESTADO A CONFIRMADO
 
             const {
                 error
@@ -260,13 +331,9 @@
                 .eq("id", id);
 
 
-
             if (error) {
 
-                console.error(
-                    "ERROR AL CONFIRMAR:",
-                    error
-                );
+                console.error(error);
 
                 alert(
                     "❌ Error al autorizar el pago."
@@ -276,41 +343,29 @@
             }
 
 
+            alert(
+                "🎃 ¡Pago autorizado!"
+            );
 
-            // ENLACE AL BOLETO
 
             const boletoUrl =
-    new URL(
-        "ticket.html?id=" + id,
-        window.location.href
-    ).href;
+                new URL(
+                    "ticket.html?id=" + id,
+                    window.location.href
+                ).href;
 
-
-
-            // LIMPIAR TELÉFONO
 
             const telefono =
                 String(boleto.Telefono)
                     .replace(/\D/g, "");
 
 
-
-            // MENSAJE DE WHATSAPP
-
             const mensaje =
                 "🎃 ¡Tu boleto para Halloween Fest está confirmado!%0A%0A" +
-
-                "🎟️ Boleto #" +
-                id +
-                "%0A%0A" +
-
+                "🎟️ Boleto #" + id + "%0A%0A" +
                 "Aquí puedes abrir tu boleto y mostrar tu QR en la entrada:%0A" +
-
                 boletoUrl;
 
-
-
-            // ABRIR WHATSAPP
 
             window.open(
                 "https://wa.me/52" +
@@ -321,18 +376,20 @@
             );
 
 
-
-            // ACTUALIZAR PANEL
-
             cargarBoletos();
 
         }
 
 
+        // CERRAR SESIÓN
 
-        // CARGAR AL ABRIR LA PÁGINA
+        async function cerrarSesion() {
 
-        cargarBoletos();
+            await supabaseClient.auth.signOut();
+
+            location.reload();
+
+        }
 
     </script>
 
