@@ -2,12 +2,18 @@
 <html lang="es">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Scanner - Halloween Fest</title>
 
     <style>
+
         body {
             font-family: Arial, sans-serif;
             background: #050505;
@@ -78,8 +84,11 @@
             margin: 10px 0;
             font-size: 18px;
         }
+
     </style>
+
 </head>
+
 
 <body>
 
@@ -95,180 +104,293 @@
 
     <div id="resultado"></div>
 
-    <button id="marcarUsado" onclick="marcarComoUsado()">
+    <button
+        id="marcarUsado"
+        onclick="marcarComoUsado()"
+    >
         ✅ MARCAR COMO USADO
     </button>
 
-    <button id="nuevoEscaneo" onclick="nuevoEscaneo()">
+    <button
+        id="nuevoEscaneo"
+        onclick="nuevoEscaneo()"
+    >
         📷 NUEVO ESCANEO
     </button>
 
 </div>
 
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+<script
+    src="https://unpkg.com/html5-qrcode"
+    type="text/javascript"
+></script>
+
 <script src="config.js"></script>
 
+
 <script>
+
 
 const supabaseClient = supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
 );
 
+
 let boletoActual = null;
+
 let scanner = null;
+
 let escaneando = false;
 
 
-// ==========================================
-// INICIAR SCANNER
-// ==========================================
+// ======================================================
+// INICIAR ESCANNER
+// ======================================================
 
 function iniciarScanner() {
 
     scanner = new Html5Qrcode("reader");
 
+
     scanner.start(
+
         { facingMode: "environment" },
+
         {
             fps: 10,
+
             qrbox: {
                 width: 250,
                 height: 250
             }
         },
 
-        codigo => {
 
-            if (!escaneando) return;
+        function(codigo) {
+
+            if (!escaneando) {
+                return;
+            }
+
 
             escaneando = false;
 
+
             verificarQR(codigo);
+
         },
 
-        error => {}
 
-    ).then(() => {
+        function(error) {
+
+            // Errores normales mientras busca QR.
+            // No hacemos nada.
+
+        }
+
+    )
+
+
+    .then(function() {
 
         escaneando = true;
 
-    }).catch(error => {
+    })
 
-        console.error(error);
+
+    .catch(function(error) {
+
+        console.error(
+            "ERROR CAMARA:",
+            error
+        );
+
 
         mostrarError(
-            "❌ NO SE PUDO ABRIR LA CÁMARA<br><br>" +
-            "Permite el acceso a la cámara."
+            "❌ NO SE PUDO ABRIR LA CÁMARA"
         );
+
     });
+
 }
 
 
-// ==========================================
+// ======================================================
 // VERIFICAR QR
-// ==========================================
+// ======================================================
 
 async function verificarQR(codigo) {
+
+
+    console.log(
+        "QR LEÍDO:",
+        codigo
+    );
+
 
     try {
 
         if (scanner) {
+
             try {
                 await scanner.stop();
             } catch (e) {}
+
         }
 
 
-        // SACAR ID DEL QR
+        // ==================================================
+        // LEER ID DEL QR
+        // ==================================================
 
-        const url = new URL(codigo);
+        const parametros =
+            new URL(codigo);
 
-        const id = Number(
-            url.searchParams.get("id")
+
+        const id =
+            parametros.searchParams.get("id");
+
+
+        console.log(
+            "ID DEL QR:",
+            id
         );
 
 
-        console.log("QR:", codigo);
-        console.log("ID:", id);
+        if (!id) {
 
-
-        if (!id || !Number.isInteger(id)) {
-
-            alert("QR LEÍDO:\n\n" + codigo);
+            mostrarError(
+                "❌ QR NO VÁLIDO"
+            );
 
             return;
         }
 
 
-        // ======================================
-        // CONSULTAR EXACTAMENTE CON EL RPC
-        // ======================================
+        // ==================================================
+        // MISMA CONSULTA QUE VALIDAR.HTML
+        // ==================================================
 
         const { data, error } =
-            await supabaseClient.rpc(
-                "obtener_boleto",
-                {
-                    p_id: id
-                }
-            );
+            await supabaseClient
+                .rpc(
+                    "obtener_boleto",
+                    {
+                        p_id: id
+                    }
+                );
 
 
-        console.log("DATA:", data);
-        console.log("ERROR:", error);
+        console.log(
+            "DATA:",
+            data
+        );
 
+
+        console.log(
+            "ERROR:",
+            error
+        );
+
+
+        // ==================================================
+        // ERROR DE SUPABASE
+        // ==================================================
 
         if (error) {
+
+            console.error(
+                "ERROR SUPABASE:",
+                error
+            );
+
 
             mostrarError(
                 "❌ ERROR AL VERIFICAR BOLETO<br><br>" +
                 error.message
             );
 
+
             return;
         }
 
 
-        // ======================================
-        // IMPORTANTE:
-        // SOPORTAR RESPUESTA COMO ARRAY U OBJETO
-        // ======================================
+        // ==================================================
+        // BOLETO NO ENCONTRADO
+        // ==================================================
 
-        const boleto =
-            Array.isArray(data)
-                ? data[0]
-                : data;
-
-
-        if (!boleto) {
+        if (!data || data.length === 0) {
 
             mostrarError(
-                "❌ BOLETO NO VÁLIDO O NO CONFIRMADO"
+                "❌ BOLETO NO VÁLIDO"
             );
+
 
             return;
         }
+
+
+        // ==================================================
+        // MISMA FORMA QUE VALIDAR.HTML
+        // ==================================================
+
+        const boleto = data[0];
 
 
         boletoActual = boleto;
 
 
         console.log(
-            "BOLETO ENCONTRADO:",
+            "BOLETO:",
             boleto
         );
 
 
-        // ======================================
-        // BOLETO USADO
-        // ======================================
+        // ==================================================
+        // CAMPOS
+        // Compatible con ambas formas
+        // ==================================================
 
-        if (boleto.estado === "Usado") {
+        const nombre =
+            boleto.Nombre ??
+            boleto.nombre ??
+            "";
+
+
+        const cantidad =
+            boleto.Cantidad ??
+            boleto.cantidad ??
+            "";
+
+
+        const total =
+            boleto.Total ??
+            boleto.total ??
+            "";
+
+
+        const estado =
+            boleto.Estado ??
+            boleto.estado ??
+            "";
+
+
+        // ==================================================
+        // BOLETO USADO
+        // ==================================================
+
+        if (estado === "Usado") {
+
 
             document.getElementById(
                 "resultado"
-            ).className = "resultado usado";
+            ).className =
+                "resultado usado";
+
 
             document.getElementById(
                 "resultado"
@@ -283,32 +405,39 @@ async function verificarQR(codigo) {
 
                 <div class="dato">
                     <strong>Nombre:</strong>
-                    ${boleto.nombre}
+                    ${nombre}
                 </div>
 
                 <p>
                     Este boleto ya fue registrado
                     en la entrada.
                 </p>
+
             `;
+
 
             document.getElementById(
                 "marcarUsado"
-            ).style.display = "none";
+            ).style.display =
+                "none";
+
 
             return;
         }
 
 
-        // ======================================
+        // ==================================================
         // BOLETO CONFIRMADO
-        // ======================================
+        // ==================================================
 
-        if (boleto.estado === "Confirmado") {
+        if (estado === "Confirmado") {
+
 
             document.getElementById(
                 "resultado"
-            ).className = "resultado valido";
+            ).className =
+                "resultado valido";
+
 
             document.getElementById(
                 "resultado"
@@ -323,31 +452,39 @@ async function verificarQR(codigo) {
 
                 <div class="dato">
                     <strong>Nombre:</strong>
-                    ${boleto.nombre}
+                    ${nombre}
                 </div>
 
                 <div class="dato">
                     <strong>Boletos:</strong>
-                    ${boleto.cantidad}
+                    ${cantidad}
                 </div>
 
                 <div class="dato">
                     <strong>Total:</strong>
-                    $${boleto.total} MXN
+                    $${total} MXN
                 </div>
 
                 <p>
-                    🎃 Puede entrar.
+                    🎃 ¡Puede entrar!
                 </p>
+
             `;
+
 
             document.getElementById(
                 "marcarUsado"
-            ).style.display = "block";
+            ).style.display =
+                "block";
+
 
             return;
         }
 
+
+        // ==================================================
+        // OTRO ESTADO
+        // ==================================================
 
         mostrarError(
             "❌ BOLETO NO CONFIRMADO"
@@ -355,25 +492,36 @@ async function verificarQR(codigo) {
 
     }
 
+
     catch (error) {
 
+
         console.error(
-            "ERROR:",
+            "ERROR REAL:",
             error
         );
 
+
+        // IMPORTANTE:
+        // Ya NO vamos a llamar esto "QR NO VÁLIDO".
+        // Así veremos el error verdadero.
+
         mostrarError(
-            "❌ QR NO VÁLIDO"
+            "❌ ERROR DEL SCANNER<br><br>" +
+            error.message
         );
+
     }
+
 }
 
 
-// ==========================================
+// ======================================================
 // MARCAR COMO USADO
-// ==========================================
+// ======================================================
 
 async function marcarComoUsado() {
+
 
     if (!boletoActual) {
 
@@ -385,23 +533,42 @@ async function marcarComoUsado() {
     }
 
 
-    const confirmar = confirm(
-        "¿Seguro que quieres marcar el boleto #" +
-        boletoActual.id +
-        " como USADO?"
-    );
+    const confirmar =
+        confirm(
+            "¿Seguro que quieres marcar el boleto #" +
+            boletoActual.id +
+            " como USADO?"
+        );
 
 
-    if (!confirmar) return;
+    if (!confirmar) {
+        return;
+    }
 
 
     const { data, error } =
-        await supabaseClient.rpc(
-            "marcar_boleto_usado",
-            {
-                p_id: Number(boletoActual.id)
-            }
-        );
+        await supabaseClient
+            .rpc(
+                "marcar_boleto_usado",
+                {
+                    p_id:
+                        Number(
+                            boletoActual.id
+                        )
+                }
+            );
+
+
+    console.log(
+        "MARCAR USADO:",
+        data
+    );
+
+
+    console.log(
+        "ERROR:",
+        error
+    );
 
 
     if (error) {
@@ -420,9 +587,16 @@ async function marcarComoUsado() {
     );
 
 
+    const nombre =
+        boletoActual.Nombre ??
+        boletoActual.nombre ??
+        "";
+
+
     document.getElementById(
         "resultado"
-    ).className = "resultado usado";
+    ).className =
+        "resultado usado";
 
 
     document.getElementById(
@@ -438,38 +612,46 @@ async function marcarComoUsado() {
 
         <div class="dato">
             <strong>Nombre:</strong>
-            ${boletoActual.nombre}
+            ${nombre}
         </div>
 
         <p>
             ✅ Entrada registrada correctamente.
         </p>
+
     `;
 
 
     document.getElementById(
         "marcarUsado"
-    ).style.display = "none";
+    ).style.display =
+        "none";
+
 }
 
 
-// ==========================================
+// ======================================================
 // NUEVO ESCANEO
-// ==========================================
+// ======================================================
 
 async function nuevoEscaneo() {
+
 
     document.getElementById(
         "resultado"
     ).innerHTML = "";
 
+
     document.getElementById(
         "resultado"
     ).className = "";
 
+
     document.getElementById(
         "marcarUsado"
-    ).style.display = "none";
+    ).style.display =
+        "none";
+
 
     boletoActual = null;
 
@@ -477,10 +659,14 @@ async function nuevoEscaneo() {
     try {
 
         if (scanner) {
+
             await scanner.clear();
+
         }
 
-    } catch (e) {}
+    }
+
+    catch (e) {}
 
 
     document.getElementById(
@@ -489,18 +675,22 @@ async function nuevoEscaneo() {
 
 
     iniciarScanner();
+
 }
 
 
-// ==========================================
-// ERROR
-// ==========================================
+// ======================================================
+// MOSTRAR ERROR
+// ======================================================
 
 function mostrarError(mensaje) {
 
+
     document.getElementById(
         "resultado"
-    ).className = "resultado invalido";
+    ).className =
+        "resultado invalido";
+
 
     document.getElementById(
         "resultado"
@@ -509,16 +699,19 @@ function mostrarError(mensaje) {
         <h2>${mensaje}</h2>
 
     `;
+
 }
 
 
-// ==========================================
+// ======================================================
 // INICIAR
-// ==========================================
+// ======================================================
 
 iniciarScanner();
+
 
 </script>
 
 </body>
+
 </html>
