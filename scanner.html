@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Scanner - Halloween Fest</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #050505;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .contenedor {
+            max-width: 500px;
+            margin: auto;
+        }
+
+        h1 {
+            color: #ff5e00;
+            font-size: 32px;
+        }
+
+        #reader {
+            width: 100%;
+            max-width: 400px;
+            margin: 25px auto;
+        }
+
+        .resultado {
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .valido {
+            background: #073d22;
+            border: 2px solid #00ff88;
+        }
+
+        .invalido {
+            background: #3d0707;
+            border: 2px solid red;
+        }
+
+        .usado {
+            background: #3d3200;
+            border: 2px solid #ffd000;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #marcarUsado {
+            background: #00ff88;
+            color: black;
+            display: none;
+        }
+
+        #nuevoEscaneo {
+            background: #ff5e00;
+            color: white;
+        }
+
+        .dato {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="contenedor">
+
+    <h1>🎃 HALLOWEEN FEST</h1>
+
+    <h2>📷 Escáner de entrada</h2>
+
+    <p>Escanea el QR del boleto.</p>
+
+    <div id="reader"></div>
+
+    <div id="resultado"></div>
+
+    <button id="marcarUsado" onclick="marcarComoUsado()">
+        ✅ MARCAR COMO USADO
+    </button>
+
+    <button id="nuevoEscaneo" onclick="nuevoEscaneo()">
+        📷 NUEVO ESCANEO
+    </button>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+<script src="config.js"></script>
+
+<script>
+
+const supabaseClient = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+let boletoActual = null;
+let scanner = null;
+let escaneando = false;
+
+
+// ===============================
+// INICIAR ESCÁNER
+// ===============================
+
+function iniciarScanner() {
+
+    scanner = new Html5Qrcode("reader");
+
+    scanner.start(
+        { facingMode: "environment" },
+
+        {
+            fps: 10,
+            qrbox: {
+                width: 250,
+                height: 250
+            }
+        },
+
+        codigo => {
+
+            if (escaneando) {
+                escaneando = false;
+                verificarQR(codigo);
+            }
+
+        },
+
+        error => {
+            // Ignorar errores normales de lectura
+        }
+
+    ).then(() => {
+
+        escaneando = true;
+
+    }).catch(error => {
+
+        mostrarError(
+            "❌ No se pudo abrir la cámara.<br><br>" +
+            "Permite el acceso a la cámara."
+        );
+
+    });
+}
+
+
+// ===============================
+// VERIFICAR QR
+// ===============================
+
+async function verificarQR(codigo) {
+
+    try {
+
+        if (scanner) {
+            await scanner.stop();
+        }
+
+    } catch (e) {}
+
+    let id = null;
+
+    try {
+
+        const url = new URL(codigo);
+
+        id = url.searchParams.get("id");
+
+    } catch (e) {
+
+        mostrarError("❌ QR NO VÁLIDO");
+
+        return;
+    }
+
+
+    if (!id) {
+
+        mostrarError("❌ QR NO VÁLIDO");
+
+        return;
+    }
+
+
+    const { data, error } = await supabaseClient
+
+        .from("Boletos")
+
+        .select("*")
+
+        .eq("id", id)
+
+        .single();
+
+
+    if (error || !data) {
+
+        mostrarError("❌ BOLETO NO ENCONTRADO");
+
+        return;
+    }
+
+
+    boletoActual = data;
+
+
+    // ===============================
+    // BOLETO YA UTILIZADO
+    // ===============================
+
+    if (data.Estado === "Usado") {
+
+        document.getElementById("resultado").className =
+            "resultado usado";
+
+        document.getElementById("resultado").innerHTML = `
+
+            <h2>🚫 BOLETO YA UTILIZADO</h2>
+
+            <div class="dato">
+                <strong>Boleto:</strong> #${data.id}
+            </div>
+
+            <div class="dato">
+                <strong>Nombre:</strong> ${data.Nombre}
+            </div>
+
+            <p>
+                Este boleto ya fue registrado en la entrada.
+            </p>
+
+        `;
+
+        document.getElementById("marcarUsado").style.display = "none";
+
+        return;
+    }
+
+
+    // ===============================
+    // BOLETO NO CONFIRMADO
+    // ===============================
+
+    if (data.Estado !== "Confirmado") {
+
+        mostrarError(`
+
+            ❌ BOLETO NO CONFIRMADO
+
+            <br><br>
+
+            Estado: ${data.Estado}
+
+        `);
+
+        return;
+    }
+
+
+    // ===============================
+    // BOLETO VÁLIDO
+    // ===============================
+
+    document.getElementById("resultado").className =
+        "resultado valido";
+
+    document.getElementById("resultado").innerHTML = `
+
+        <h2>✅ BOLETO VÁLIDO</h2>
+
+        <div class="dato">
+            <strong>Boleto:</strong> #${data.id}
+        </div>
+
+        <div class="dato">
+            <strong>Nombre:</strong> ${data.Nombre}
+        </div>
+
+        <div class="dato">
+            <strong>Boletos:</strong> ${data.Cantidad}
+        </div>
+
+        <p>
+            🎃 Puede entrar.
+        </p>
+
+    `;
+
+    document.getElementById("marcarUsado").style.display =
+        "block";
+}
+
+
+// ===============================
+// MARCAR COMO USADO
+// ===============================
+
+async function marcarComoUsado() {
+
+    if (!boletoActual) {
+        return;
+    }
+
+
+    const { error } = await supabaseClient
+
+        .from("Boletos")
+
+        .update({
+            Estado: "Usado"
+        })
+
+        .eq("id", boletoActual.id);
+
+
+    if (error) {
+
+        alert(
+            "❌ Error al marcar el boleto:\n\n" +
+            error.message
+        );
+
+        return;
+    }
+
+
+    document.getElementById("resultado").className =
+        "resultado usado";
+
+    document.getElementById("resultado").innerHTML = `
+
+        <h2>🎟️ BOLETO REGISTRADO</h2>
+
+        <div class="dato">
+            <strong>Boleto:</strong> #${boletoActual.id}
+        </div>
+
+        <div class="dato">
+            <strong>Nombre:</strong> ${boletoActual.Nombre}
+        </div>
+
+        <p>
+            ✅ Entrada registrada correctamente.
+        </p>
+
+    `;
+
+    document.getElementById("marcarUsado").style.display =
+        "none";
+
+    boletoActual = null;
+}
+
+
+// ===============================
+// NUEVO ESCANEO
+// ===============================
+
+function nuevoEscaneo() {
+
+    document.getElementById("resultado").innerHTML = "";
+
+    document.getElementById("resultado").className = "";
+
+    document.getElementById("marcarUsado").style.display =
+        "none";
+
+    boletoActual = null;
+
+    iniciarScanner();
+}
+
+
+// ===============================
+// ERROR
+// ===============================
+
+function mostrarError(mensaje) {
+
+    document.getElementById("resultado").className =
+        "resultado invalido";
+
+    document.getElementById("resultado").innerHTML = `
+
+        <h2>${mensaje}</h2>
+
+    `;
+
+}
+
+
+// ===============================
+// INICIAR
+// ===============================
+
+iniciarScanner();
+
+</script>
+
+</body>
+</html>
