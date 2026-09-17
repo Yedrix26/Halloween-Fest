@@ -119,12 +119,12 @@
                 return;
             }
 
-            const { data, error } = await supabaseClient
-                .from("Boletos")
-                .select("*")
-                .eq("id", id)
-                .eq("Estado", "Confirmado")
-                .single();
+          const { data, error } = await supabaseClient
+    .from("Boletos")
+    .select("id, Nombre, Cantidad, Total, Estado")
+    .eq("id", id)
+    .eq("Estado", "Confirmado")
+    .single();
 
             if (error || !data) {
 
