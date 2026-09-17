@@ -196,7 +196,7 @@ async function verificarQR(codigo) {
 
         if (!id || !Number.isInteger(id)) {
 
-            mostrarError("❌ QR NO VÁLIDO");
+            alert("QR LEÍDO:\n\n" + codigo);
 
             return;
         }
