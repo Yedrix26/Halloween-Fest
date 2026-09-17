@@ -447,24 +447,50 @@ actualizarTotal();
 
         // Actualizar total
 
-        async function actualizarTotal() {
+    async function actualizarTotal() {
 
     const { data, error } = await supabaseClient
-        .rpc("calcular_precio");
+        .from("Boletos")
+        .select("Cantidad")
+        .eq("Estado", "Confirmado");
 
     if (error) {
-
         console.error(
             "ERROR AL CALCULAR PRECIO:",
             error
         );
+        return;
+    }
+
+    const vendidos = data.reduce(
+        (total, boleto) => {
+            return total + Number(boleto.Cantidad);
+        },
+        0
+    );
+
+    if (vendidos + cantidad > 500) {
+
+        document.getElementById("total").textContent =
+            "NO DISPONIBLE";
 
         return;
     }
 
-    const precio = Number(data);
+    const boletos100 = Math.max(
+        0,
+        Math.min(
+            cantidad,
+            100 - vendidos
+        )
+    );
 
-    const total = cantidad * precio;
+    const boletos150 =
+        cantidad - boletos100;
+
+    const total =
+        (boletos100 * 100) +
+        (boletos150 * 150);
 
     document.getElementById("total").textContent =
         total;
