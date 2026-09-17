@@ -209,14 +209,16 @@ async function verificarQR(codigo) {
 
 
     const { data, error } = await supabaseClient
+    .rpc("obtener_boleto", {
+        p_id: id
+    });
 
-        .from("Boletos")
+if (error || !data || data.length === 0) {
+    mostrarError("❌ BOLETO NO ENCONTRADO");
+    return;
+}
 
-        .select("*")
-
-        .eq("id", id)
-
-        .single();
+const boleto = data[0];
 
 
     if (error || !data) {
@@ -227,14 +229,14 @@ async function verificarQR(codigo) {
     }
 
 
-    boletoActual = data;
+    boletoActual = boleto;
 
 
     // ===============================
     // BOLETO YA UTILIZADO
     // ===============================
 
-    if (data.Estado === "Usado") {
+    if (data.estado === "Usado") {
 
         document.getElementById("resultado").className =
             "resultado usado";
@@ -244,11 +246,11 @@ async function verificarQR(codigo) {
             <h2>🚫 BOLETO YA UTILIZADO</h2>
 
             <div class="dato">
-                <strong>Boleto:</strong> #${data.id}
+                <strong>Boleto:</strong> #${boleto.id}
             </div>
 
             <div class="dato">
-                <strong>Nombre:</strong> ${data.Nombre}
+                <strong>Nombre:</strong> ${boleto.Nombre}
             </div>
 
             <p>
@@ -295,15 +297,15 @@ async function verificarQR(codigo) {
         <h2>✅ BOLETO VÁLIDO</h2>
 
         <div class="dato">
-            <strong>Boleto:</strong> #${data.id}
+            <strong>Boleto:</strong> #${boleto.id}
         </div>
 
         <div class="dato">
-            <strong>Nombre:</strong> ${data.Nombre}
+            <strong>Nombre:</strong> ${boleto.Nombre}
         </div>
 
         <div class="dato">
-            <strong>Boletos:</strong> ${data.Cantidad}
+            <strong>Boletos:</strong> ${boleto.Cantidad}
         </div>
 
         <p>
