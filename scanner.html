@@ -2,15 +2,12 @@
 <html lang="es">
 
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Scanner - Halloween Fest</title>
 
     <style>
-
         body {
             font-family: Arial, sans-serif;
             background: #050505;
@@ -81,9 +78,7 @@
             margin: 10px 0;
             font-size: 18px;
         }
-
     </style>
-
 </head>
 
 <body>
@@ -100,26 +95,18 @@
 
     <div id="resultado"></div>
 
-    <button
-        id="marcarUsado"
-        onclick="marcarComoUsado()"
-    >
+    <button id="marcarUsado" onclick="marcarComoUsado()">
         ✅ MARCAR COMO USADO
     </button>
 
-    <button
-        id="nuevoEscaneo"
-        onclick="nuevoEscaneo()"
-    >
+    <button id="nuevoEscaneo" onclick="nuevoEscaneo()">
         📷 NUEVO ESCANEO
     </button>
 
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-
 <script src="config.js"></script>
 
 <script>
@@ -130,24 +117,20 @@ const supabaseClient = supabase.createClient(
 );
 
 let boletoActual = null;
-
 let scanner = null;
-
 let escaneando = false;
 
 
-// =====================================================
+// ==========================================
 // INICIAR SCANNER
-// =====================================================
+// ==========================================
 
 function iniciarScanner() {
 
     scanner = new Html5Qrcode("reader");
 
     scanner.start(
-        {
-            facingMode: "environment"
-        },
+        { facingMode: "environment" },
         {
             fps: 10,
             qrbox: {
@@ -155,46 +138,39 @@ function iniciarScanner() {
                 height: 250
             }
         },
+
         codigo => {
 
-            if (!escaneando) {
-                return;
-            }
+            if (!escaneando) return;
 
             escaneando = false;
 
             verificarQR(codigo);
-
         },
+
         error => {}
 
-    )
-    .then(() => {
+    ).then(() => {
 
         escaneando = true;
 
-    })
-    .catch(error => {
+    }).catch(error => {
 
-        console.error("ERROR CAMARA:", error);
+        console.error(error);
 
         mostrarError(
             "❌ NO SE PUDO ABRIR LA CÁMARA<br><br>" +
             "Permite el acceso a la cámara."
         );
-
     });
-
 }
 
 
-// =====================================================
+// ==========================================
 // VERIFICAR QR
-// =====================================================
+// ==========================================
 
 async function verificarQR(codigo) {
-
-    console.log("QR LEÍDO:", codigo);
 
     try {
 
@@ -204,70 +180,33 @@ async function verificarQR(codigo) {
             } catch (e) {}
         }
 
-        // =============================================
+
         // SACAR ID DEL QR
-        // =============================================
 
-        let id = null;
+        const url = new URL(codigo);
 
-        try {
+        const id = Number(
+            url.searchParams.get("id")
+        );
 
-            const url = new URL(codigo);
 
-            id = url.searchParams.get("id");
+        console.log("QR:", codigo);
+        console.log("ID:", id);
 
-        } catch (e) {
 
-            console.log(
-                "No se pudo interpretar como URL."
-            );
+        if (!id || !Number.isInteger(id)) {
 
-        }
-
-        // =============================================
-        // SEGUNDO MÉTODO PARA OBTENER EL ID
-        // =============================================
-
-        if (!id) {
-
-            const encontrado =
-                String(codigo).match(
-                    /[?&]id=([0-9]+)/
-                );
-
-            if (encontrado) {
-                id = encontrado[1];
-            }
-
-        }
-
-        // =============================================
-        // CONVERTIR A NÚMERO
-        // =============================================
-
-        id = Number(id);
-
-        console.log("ID OBTENIDO:", id);
-
-        // =============================================
-        // VALIDAR ID
-        // =============================================
-
-        if (!Number.isInteger(id) || id <= 0) {
-
-            mostrarError(
-                "❌ QR NO VÁLIDO"
-            );
+            mostrarError("❌ QR NO VÁLIDO");
 
             return;
-
         }
 
-        // =============================================
-        // CONSULTAR BOLETO
-        // =============================================
 
-        const respuesta =
+        // ======================================
+        // CONSULTAR EXACTAMENTE CON EL RPC
+        // ======================================
+
+        const { data, error } =
             await supabaseClient.rpc(
                 "obtener_boleto",
                 {
@@ -275,23 +214,10 @@ async function verificarQR(codigo) {
                 }
             );
 
-        const data = respuesta.data;
 
-        const error = respuesta.error;
+        console.log("DATA:", data);
+        console.log("ERROR:", error);
 
-        console.log(
-            "DATOS:",
-            data
-        );
-
-        console.log(
-            "ERROR:",
-            error
-        );
-
-        // =============================================
-        // ERROR
-        // =============================================
 
         if (error) {
 
@@ -301,46 +227,48 @@ async function verificarQR(codigo) {
             );
 
             return;
-
         }
 
-        // =============================================
-        // NO EXISTE
-        // =============================================
 
-        if (!data || data.length === 0) {
+        // ======================================
+        // IMPORTANTE:
+        // SOPORTAR RESPUESTA COMO ARRAY U OBJETO
+        // ======================================
+
+        const boleto =
+            Array.isArray(data)
+                ? data[0]
+                : data;
+
+
+        if (!boleto) {
 
             mostrarError(
                 "❌ BOLETO NO VÁLIDO O NO CONFIRMADO"
             );
 
             return;
-
         }
 
-        // =============================================
-        // GUARDAR BOLETO
-        // =============================================
-
-        const boleto = data[0];
 
         boletoActual = boleto;
+
 
         console.log(
             "BOLETO ENCONTRADO:",
             boleto
         );
 
-        // =============================================
-        // YA USADO
-        // =============================================
+
+        // ======================================
+        // BOLETO USADO
+        // ======================================
 
         if (boleto.estado === "Usado") {
 
             document.getElementById(
                 "resultado"
-            ).className =
-                "resultado usado";
+            ).className = "resultado usado";
 
             document.getElementById(
                 "resultado"
@@ -362,7 +290,6 @@ async function verificarQR(codigo) {
                     Este boleto ya fue registrado
                     en la entrada.
                 </p>
-
             `;
 
             document.getElementById(
@@ -370,19 +297,18 @@ async function verificarQR(codigo) {
             ).style.display = "none";
 
             return;
-
         }
 
-        // =============================================
-        // CONFIRMADO
-        // =============================================
+
+        // ======================================
+        // BOLETO CONFIRMADO
+        // ======================================
 
         if (boleto.estado === "Confirmado") {
 
             document.getElementById(
                 "resultado"
-            ).className =
-                "resultado valido";
+            ).className = "resultado valido";
 
             document.getElementById(
                 "resultado"
@@ -413,7 +339,6 @@ async function verificarQR(codigo) {
                 <p>
                     🎃 Puede entrar.
                 </p>
-
             `;
 
             document.getElementById(
@@ -421,8 +346,8 @@ async function verificarQR(codigo) {
             ).style.display = "block";
 
             return;
-
         }
+
 
         mostrarError(
             "❌ BOLETO NO CONFIRMADO"
@@ -433,22 +358,20 @@ async function verificarQR(codigo) {
     catch (error) {
 
         console.error(
-            "ERROR GENERAL:",
+            "ERROR:",
             error
         );
 
         mostrarError(
-            "❌ ERROR AL VERIFICAR BOLETO"
+            "❌ QR NO VÁLIDO"
         );
-
     }
-
 }
 
 
-// =====================================================
+// ==========================================
 // MARCAR COMO USADO
-// =====================================================
+// ==========================================
 
 async function marcarComoUsado() {
 
@@ -459,8 +382,8 @@ async function marcarComoUsado() {
         );
 
         return;
-
     }
+
 
     const confirmar = confirm(
         "¿Seguro que quieres marcar el boleto #" +
@@ -468,9 +391,9 @@ async function marcarComoUsado() {
         " como USADO?"
     );
 
-    if (!confirmar) {
-        return;
-    }
+
+    if (!confirmar) return;
+
 
     const { data, error } =
         await supabaseClient.rpc(
@@ -480,15 +403,6 @@ async function marcarComoUsado() {
             }
         );
 
-    console.log(
-        "RESULTADO:",
-        data
-    );
-
-    console.log(
-        "ERROR:",
-        error
-    );
 
     if (error) {
 
@@ -498,17 +412,18 @@ async function marcarComoUsado() {
         );
 
         return;
-
     }
+
 
     alert(
         "✅ ¡Boleto marcado como USADO!"
     );
 
+
     document.getElementById(
         "resultado"
-    ).className =
-        "resultado usado";
+    ).className = "resultado usado";
+
 
     document.getElementById(
         "resultado"
@@ -529,19 +444,18 @@ async function marcarComoUsado() {
         <p>
             ✅ Entrada registrada correctamente.
         </p>
-
     `;
+
 
     document.getElementById(
         "marcarUsado"
     ).style.display = "none";
-
 }
 
 
-// =====================================================
+// ==========================================
 // NUEVO ESCANEO
-// =====================================================
+// ==========================================
 
 async function nuevoEscaneo() {
 
@@ -559,6 +473,7 @@ async function nuevoEscaneo() {
 
     boletoActual = null;
 
+
     try {
 
         if (scanner) {
@@ -567,25 +482,25 @@ async function nuevoEscaneo() {
 
     } catch (e) {}
 
+
     document.getElementById(
         "reader"
     ).innerHTML = "";
 
-    iniciarScanner();
 
+    iniciarScanner();
 }
 
 
-// =====================================================
+// ==========================================
 // ERROR
-// =====================================================
+// ==========================================
 
 function mostrarError(mensaje) {
 
     document.getElementById(
         "resultado"
-    ).className =
-        "resultado invalido";
+    ).className = "resultado invalido";
 
     document.getElementById(
         "resultado"
@@ -594,18 +509,16 @@ function mostrarError(mensaje) {
         <h2>${mensaje}</h2>
 
     `;
-
 }
 
 
-// =====================================================
+// ==========================================
 // INICIAR
-// =====================================================
+// ==========================================
 
 iniciarScanner();
 
 </script>
 
 </body>
-
 </html>
