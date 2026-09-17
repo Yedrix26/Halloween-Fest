@@ -145,14 +145,16 @@ function iniciarScanner() {
         codigo => {
 
             if (escaneando) {
+
                 escaneando = false;
+
                 verificarQR(codigo);
             }
 
         },
 
         error => {
-            // Ignorar errores normales de lectura
+            // Errores normales de lectura: ignorar
         }
 
     ).then(() => {
@@ -160,6 +162,8 @@ function iniciarScanner() {
         escaneando = true;
 
     }).catch(error => {
+
+        console.error(error);
 
         mostrarError(
             "❌ No se pudo abrir la cámara.<br><br>" +
@@ -184,7 +188,9 @@ async function verificarQR(codigo) {
 
     } catch (e) {}
 
+
     let id = null;
+
 
     try {
 
@@ -208,20 +214,30 @@ async function verificarQR(codigo) {
     }
 
 
+    console.log("ID ESCANEADO:", id);
+
+
     const { data, error } = await supabaseClient
-    .rpc("obtener_boleto", {
-        p_id: id
-    });
-
-if (error || !data || data.length === 0) {
-    mostrarError("❌ BOLETO NO ENCONTRADO");
-    return;
-}
-
-const boleto = data[0];
+        .rpc("obtener_boleto", {
+            p_id: id
+        });
 
 
-    if (error || !data) {
+    console.log("RESPUESTA:", data);
+    console.log("ERROR:", error);
+
+
+    if (error) {
+
+        console.error("ERROR SUPABASE:", error);
+
+        mostrarError("❌ ERROR AL VERIFICAR BOLETO");
+
+        return;
+    }
+
+
+    if (!data || data.length === 0) {
 
         mostrarError("❌ BOLETO NO ENCONTRADO");
 
@@ -229,14 +245,16 @@ const boleto = data[0];
     }
 
 
+    const boleto = data[0];
+
     boletoActual = boleto;
 
 
     // ===============================
-    // BOLETO YA UTILIZADO
+    // BOLETO USADO
     // ===============================
 
-    if (data.estado === "Usado") {
+    if (boleto.estado === "Usado") {
 
         document.getElementById("resultado").className =
             "resultado usado";
@@ -250,7 +268,7 @@ const boleto = data[0];
             </div>
 
             <div class="dato">
-                <strong>Nombre:</strong> ${boleto.Nombre}
+                <strong>Nombre:</strong> ${boleto.nombre}
             </div>
 
             <p>
@@ -259,63 +277,52 @@ const boleto = data[0];
 
         `;
 
-        document.getElementById("marcarUsado").style.display = "none";
+        document.getElementById("marcarUsado").style.display =
+            "none";
 
         return;
     }
 
 
     // ===============================
-    // BOLETO NO CONFIRMADO
+    // BOLETO CONFIRMADO
     // ===============================
 
-    if (data.Estado !== "Confirmado") {
+    if (boleto.estado === "Confirmado") {
 
-        mostrarError(`
+        document.getElementById("resultado").className =
+            "resultado valido";
 
-            ❌ BOLETO NO CONFIRMADO
+        document.getElementById("resultado").innerHTML = `
 
-            <br><br>
+            <h2>✅ BOLETO VÁLIDO</h2>
 
-            Estado: ${data.Estado}
+            <div class="dato">
+                <strong>Boleto:</strong> #${boleto.id}
+            </div>
 
-        `);
+            <div class="dato">
+                <strong>Nombre:</strong> ${boleto.nombre}
+            </div>
+
+            <div class="dato">
+                <strong>Boletos:</strong> ${boleto.cantidad}
+            </div>
+
+            <p>
+                🎃 Puede entrar.
+            </p>
+
+        `;
+
+        document.getElementById("marcarUsado").style.display =
+            "block";
 
         return;
     }
 
 
-    // ===============================
-    // BOLETO VÁLIDO
-    // ===============================
-
-    document.getElementById("resultado").className =
-        "resultado valido";
-
-    document.getElementById("resultado").innerHTML = `
-
-        <h2>✅ BOLETO VÁLIDO</h2>
-
-        <div class="dato">
-            <strong>Boleto:</strong> #${boleto.id}
-        </div>
-
-        <div class="dato">
-            <strong>Nombre:</strong> ${boleto.Nombre}
-        </div>
-
-        <div class="dato">
-            <strong>Boletos:</strong> ${boleto.Cantidad}
-        </div>
-
-        <p>
-            🎃 Puede entrar.
-        </p>
-
-    `;
-
-    document.getElementById("marcarUsado").style.display =
-        "block";
+    mostrarError("❌ BOLETO NO CONFIRMADO");
 }
 
 
@@ -331,17 +338,16 @@ async function marcarComoUsado() {
 
 
     const { error } = await supabaseClient
-
         .from("Boletos")
-
         .update({
             Estado: "Usado"
         })
-
         .eq("id", boletoActual.id);
 
 
     if (error) {
+
+        console.error(error);
 
         alert(
             "❌ Error al marcar el boleto:\n\n" +
@@ -364,7 +370,7 @@ async function marcarComoUsado() {
         </div>
 
         <div class="dato">
-            <strong>Nombre:</strong> ${boletoActual.Nombre}
+            <strong>Nombre:</strong> ${boletoActual.nombre}
         </div>
 
         <p>
@@ -373,8 +379,10 @@ async function marcarComoUsado() {
 
     `;
 
+
     document.getElementById("marcarUsado").style.display =
         "none";
+
 
     boletoActual = null;
 }
@@ -384,7 +392,7 @@ async function marcarComoUsado() {
 // NUEVO ESCANEO
 // ===============================
 
-function nuevoEscaneo() {
+async function nuevoEscaneo() {
 
     document.getElementById("resultado").innerHTML = "";
 
@@ -395,12 +403,20 @@ function nuevoEscaneo() {
 
     boletoActual = null;
 
+    try {
+
+        if (scanner) {
+            await scanner.clear();
+        }
+
+    } catch (e) {}
+
     iniciarScanner();
 }
 
 
 // ===============================
-// ERROR
+// MOSTRAR ERROR
 // ===============================
 
 function mostrarError(mensaje) {
@@ -413,7 +429,6 @@ function mostrarError(mensaje) {
         <h2>${mensaje}</h2>
 
     `;
-
 }
 
 
