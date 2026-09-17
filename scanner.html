@@ -145,13 +145,41 @@ let boletoActual = null;
 let scanner = null;
 
 let escaneando = false;
-
-
 // ======================================================
-// INICIAR ESCANNER
+// VERIFICAR SESIÓN DE ADMINISTRADOR
 // ======================================================
 
-function iniciarScanner() {
+async function verificarSesion() {
+
+    const {
+        data: { session }
+    } = await supabaseClient.auth.getSession();
+
+    if (!session) {
+
+        alert(
+            "🔐 Debes iniciar sesión como administrador."
+        );
+
+        window.location.href = "admin.html";
+
+        return false;
+    }
+
+    return true;
+}
+
+// ======================================================
+// INICIAR
+// ======================================================
+
+verificarSesion().then(function(autorizado) {
+
+    if (autorizado) {
+        iniciarScanner();
+    }
+
+});
 
     scanner = new Html5Qrcode("reader");
 
