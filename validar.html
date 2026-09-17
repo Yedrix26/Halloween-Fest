@@ -96,16 +96,17 @@
             }
 
 
-            const { data, error } =
-                await supabaseClient
+            const { data, error } = await supabaseClient
+    .rpc("obtener_boleto", {
+        p_id: id
+    });
 
-                    .from("Boletos")
+if (error || !data || data.length === 0) {
+    mostrarError("❌ BOLETO NO VÁLIDO");
+    return;
+}
 
-                    .select("*")
-
-                    .eq("id", id)
-
-                    .single();
+const boleto = data[0];
 
 
             if (error || !data) {
