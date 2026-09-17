@@ -120,11 +120,17 @@
             }
 
           const { data, error } = await supabaseClient
-    .from("Boletos")
-    .select("id, Nombre, Cantidad, Total, Estado")
-    .eq("id", id)
-    .eq("Estado", "Confirmado")
-    .single();
+    .rpc("obtener_boleto", {
+        p_id: id
+    });
+
+if (error || !data || data.length === 0) {
+    document.body.innerHTML =
+        "<h1>❌ Boleto no válido o no confirmado</h1>";
+    return;
+}
+
+const boleto = data[0];
 
             if (error || !data) {
 
@@ -134,17 +140,10 @@
                 return;
             }
 
-            document.getElementById("idBoleto").textContent =
-                data.id;
-
-            document.getElementById("nombre").textContent =
-                data.Nombre;
-
-            document.getElementById("cantidad").textContent =
-                data.Cantidad;
-
-            document.getElementById("total").textContent =
-                data.Total;
+            document.getElementById("idBoleto").textContent = boleto.id;
+document.getElementById("nombre").textContent = boleto.nombre;
+document.getElementById("cantidad").textContent = boleto.cantidad;
+document.getElementById("total").textContent = boleto.total;
 
 
             const urlValidacion =
