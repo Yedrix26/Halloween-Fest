@@ -1,12 +1,19 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Tu boleto - Halloween Fest</title>
 
     <style>
+
         body {
             font-family: Arial, sans-serif;
             background: #050505;
@@ -53,120 +60,233 @@
             margin-top: 25px;
             color: #ccc;
         }
+
     </style>
+
 </head>
+
 
 <body>
 
-    <div class="ticket">
+<div class="ticket">
 
-        <h1>🎃 HALLOWEEN FEST</h1>
+    <h1>🎃 HALLOWEEN FEST</h1>
 
-        <p class="confirmado">
-            ✅ BOLETO CONFIRMADO
-        </p>
+    <p class="confirmado">
+        ✅ BOLETO CONFIRMADO
+    </p>
 
-        <div id="qrcode"></div>
+    <div id="qrcode"></div>
 
-        <div class="dato">
-            <strong>ID:</strong>
-            <span id="idBoleto"></span>
-        </div>
-
-        <div class="dato">
-            <strong>Nombre:</strong>
-            <span id="nombre"></span>
-        </div>
-
-        <div class="dato">
-            <strong>Boletos:</strong>
-            <span id="cantidad"></span>
-        </div>
-
-        <div class="dato">
-            <strong>Total:</strong>
-            $<span id="total"></span> MXN
-        </div>
-
-        <p class="aviso">
-            📱 Presenta este QR en la entrada.
-        </p>
-
+    <div class="dato">
+        <strong>ID:</strong>
+        <span id="idBoleto"></span>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-    <script src="config.js"></script>
+    <div class="dato">
+        <strong>Nombre:</strong>
+        <span id="nombre"></span>
+    </div>
 
-    <script>
+    <div class="dato">
+        <strong>Boletos:</strong>
+        <span id="cantidad"></span>
+    </div>
 
-        const supabaseClient = supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_KEY
+    <div class="dato">
+        <strong>Total:</strong>
+        $<span id="total"></span> MXN
+    </div>
+
+    <p class="aviso">
+        📱 Presenta este QR en la entrada.
+    </p>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+<script src="config.js"></script>
+
+
+<script>
+
+const supabaseClient = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+
+// ======================================================
+// CARGAR BOLETO
+// ======================================================
+
+async function cargarBoleto() {
+
+
+    // -----------------------------------------------
+    // OBTENER ID DE LA URL
+    // -----------------------------------------------
+
+    const parametros =
+        new URLSearchParams(
+            window.location.search
         );
 
-        async function cargarBoleto() {
 
-            const parametros = new URLSearchParams(
-                window.location.search
-            );
-
-            const id = parametros.get("id");
-
-            if (!id) {
-                document.body.innerHTML =
-                    "<h1>❌ Boleto no encontrado</h1>";
-                return;
-            }
-
-          const { data, error } = await supabaseClient
-    .rpc("obtener_boleto", {
-        p_id: id
-    });
-
-if (error || !data || data.length === 0) {
-    document.body.innerHTML =
-        "<h1>❌ Boleto no válido o no confirmado</h1>";
-    return;
-}
-
-const boleto = data[0];
-
-            if (error || !data) {
-
-                document.body.innerHTML =
-                    "<h1>❌ Boleto no válido o no confirmado</h1>";
-
-                return;
-            }
-
-            document.getElementById("idBoleto").textContent = boleto.id;
-document.getElementById("nombre").textContent = boleto.nombre;
-document.getElementById("cantidad").textContent = boleto.cantidad;
-document.getElementById("total").textContent = boleto.total;
+    const id =
+        parametros.get("id");
 
 
-            const urlValidacion =
-    new URL(
-        "validar.html?id=" + data.id,
-        window.location.href
-    ).href;
+    if (!id) {
+
+        document.body.innerHTML =
+            "<h1>❌ Boleto no encontrado</h1>";
+
+        return;
+    }
 
 
-            new QRCode(
-                document.getElementById("qrcode"),
+    console.log(
+        "ID DEL BOLETO:",
+        id
+    );
+
+
+    // -----------------------------------------------
+    // CONSULTAR BOLETO
+    // -----------------------------------------------
+
+    const { data, error } =
+        await supabaseClient
+            .rpc(
+                "obtener_boleto",
                 {
-                    text: urlValidacion,
-                    width: 220,
-                    height: 220
+                    p_id: id
                 }
             );
 
+
+    console.log(
+        "DATA:",
+        data
+    );
+
+
+    console.log(
+        "ERROR:",
+        error
+    );
+
+
+    if (
+        error ||
+        !data ||
+        data.length === 0
+    ) {
+
+        document.body.innerHTML =
+            "<h1>❌ Boleto no válido o no confirmado</h1>";
+
+        return;
+    }
+
+
+    const boleto = data[0];
+
+
+    // -----------------------------------------------
+    // DATOS DEL BOLETO
+    // -----------------------------------------------
+
+    document.getElementById(
+        "idBoleto"
+    ).textContent =
+        id;
+
+
+    document.getElementById(
+        "nombre"
+    ).textContent =
+        boleto.nombre ??
+        boleto.Nombre ??
+        "";
+
+
+    document.getElementById(
+        "cantidad"
+    ).textContent =
+        boleto.cantidad ??
+        boleto.Cantidad ??
+        "";
+
+
+    document.getElementById(
+        "total"
+    ).textContent =
+        boleto.total ??
+        boleto.Total ??
+        "";
+
+
+    // =================================================
+    // GENERAR QR
+    // =================================================
+    //
+    // IMPORTANTE:
+    // Usamos DIRECTAMENTE el ID de la URL.
+    //
+    // Si la página es:
+    //
+    // ticket.html?id=31
+    //
+    // el QR SIEMPRE será:
+    //
+    // validar.html?id=31
+    //
+    // Nunca dependerá de boleto.id.
+    // =================================================
+
+
+    const urlValidacion =
+        new URL(
+            "validar.html?id=" +
+            encodeURIComponent(id),
+            window.location.href
+        ).href;
+
+
+    console.log(
+        "URL DEL QR:",
+        urlValidacion
+    );
+
+
+    new QRCode(
+        document.getElementById(
+            "qrcode"
+        ),
+        {
+            text: urlValidacion,
+            width: 220,
+            height: 220
         }
+    );
 
-        cargarBoleto();
+}
 
-    </script>
+
+// ======================================================
+// INICIAR
+// ======================================================
+
+cargarBoleto();
+
+</script>
 
 </body>
+
 </html>
