@@ -148,9 +148,10 @@
 
 
             const urlValidacion =
-                window.location.origin +
-                "/validar.html?id=" +
-                data.id;
+    new URL(
+        "validar.html?id=" + data.id,
+        window.location.href
+    ).href;
 
 
             new QRCode(
