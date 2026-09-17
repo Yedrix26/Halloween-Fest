@@ -60,7 +60,6 @@
             border-radius: 10px;
             font-size: 18px;
             font-weight: bold;
-            cursor: pointer;
         }
 
         #marcarUsado {
@@ -144,18 +143,15 @@ function iniciarScanner() {
 
         codigo => {
 
-            if (escaneando) {
+            if (!escaneando) return;
 
-                escaneando = false;
+            escaneando = false;
 
-                verificarQR(codigo);
-            }
+            verificarQR(codigo);
 
         },
 
-        error => {
-            // Errores normales de lectura: ignorar
-        }
+        error => {}
 
     ).then(() => {
 
@@ -218,30 +214,30 @@ async function verificarQR(codigo) {
 
 
     const { data, error } = await supabaseClient
-        .rpc("obtener_boleto", {
-            p_id: id
-        });
+        .from("Boletos")
+        .select("id, Nombre, Cantidad, Total, Estado")
+        .eq("id", id)
+        .single();
 
 
-    console.log("RESPUESTA:", data);
-    alert(JSON.stringify(data));
+    console.log("BOLETO:", data);
     console.log("ERROR:", error);
 
 
     if (error) {
 
-    console.error("ERROR SUPABASE:", error);
+        console.error(error);
 
-    mostrarError(
-        "❌ ERROR AL VERIFICAR BOLETO<br><br>" +
-        error.message
-    );
+        mostrarError(
+            "❌ ERROR AL VERIFICAR BOLETO<br><br>" +
+            error.message
+        );
 
-    return;
-}
+        return;
+    }
 
 
-    if (!data || data.length === 0) {
+    if (!data) {
 
         mostrarError("❌ BOLETO NO ENCONTRADO");
 
@@ -249,16 +245,14 @@ async function verificarQR(codigo) {
     }
 
 
-    const boleto = data[0];
-
-    boletoActual = boleto;
+    boletoActual = data;
 
 
     // ===============================
     // BOLETO USADO
     // ===============================
 
-    if (boleto.estado === "Usado") {
+    if (data.Estado === "Usado") {
 
         document.getElementById("resultado").className =
             "resultado usado";
@@ -268,11 +262,11 @@ async function verificarQR(codigo) {
             <h2>🚫 BOLETO YA UTILIZADO</h2>
 
             <div class="dato">
-                <strong>Boleto:</strong> #${boleto.id}
+                <strong>Boleto:</strong> #${data.id}
             </div>
 
             <div class="dato">
-                <strong>Nombre:</strong> ${boleto.nombre}
+                <strong>Nombre:</strong> ${data.Nombre}
             </div>
 
             <p>
@@ -292,7 +286,7 @@ async function verificarQR(codigo) {
     // BOLETO CONFIRMADO
     // ===============================
 
-    if (boleto.estado === "Confirmado") {
+    if (data.Estado === "Confirmado") {
 
         document.getElementById("resultado").className =
             "resultado valido";
@@ -302,15 +296,15 @@ async function verificarQR(codigo) {
             <h2>✅ BOLETO VÁLIDO</h2>
 
             <div class="dato">
-                <strong>Boleto:</strong> #${boleto.id}
+                <strong>Boleto:</strong> #${data.id}
             </div>
 
             <div class="dato">
-                <strong>Nombre:</strong> ${boleto.nombre}
+                <strong>Nombre:</strong> ${data.Nombre}
             </div>
 
             <div class="dato">
-                <strong>Boletos:</strong> ${boleto.cantidad}
+                <strong>Boletos:</strong> ${data.Cantidad}
             </div>
 
             <p>
@@ -351,8 +345,6 @@ async function marcarComoUsado() {
 
     if (error) {
 
-        console.error(error);
-
         alert(
             "❌ Error al marcar el boleto:\n\n" +
             error.message
@@ -374,7 +366,7 @@ async function marcarComoUsado() {
         </div>
 
         <div class="dato">
-            <strong>Nombre:</strong> ${boletoActual.nombre}
+            <strong>Nombre:</strong> ${boletoActual.Nombre}
         </div>
 
         <p>
@@ -407,6 +399,7 @@ async function nuevoEscaneo() {
 
     boletoActual = null;
 
+
     try {
 
         if (scanner) {
@@ -415,12 +408,13 @@ async function nuevoEscaneo() {
 
     } catch (e) {}
 
+
     iniciarScanner();
 }
 
 
 // ===============================
-// MOSTRAR ERROR
+// ERROR
 // ===============================
 
 function mostrarError(mensaje) {
