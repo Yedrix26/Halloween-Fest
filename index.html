@@ -389,22 +389,38 @@ console.log("CLIENTE SUPABASE:", supabaseClient);
 
         let cantidad = 1;
 async function actualizarDisponibles() {
+
     const { data, error } = await supabaseClient
         .from("Boletos")
-        .select("Cantidad");
+        .select("Cantidad")
+        .eq("Estado", "Confirmado");
+
 
     if (error) {
-        console.error("ERROR AL CONTAR BOLETOS:", error);
+
+        console.error(
+            "ERROR AL CONTAR BOLETOS:",
+            error
+        );
+
         return;
     }
 
-    const vendidos = data.reduce((total, boleto) => {
-        return total + Number(boleto.Cantidad);
-    }, 0);
+
+    const vendidos = data.reduce(
+        (total, boleto) => {
+            return total + Number(boleto.Cantidad);
+        },
+        0
+    );
+
 
     const disponibles = 500 - vendidos;
 
-    document.getElementById("disponibles").textContent = disponibles;
+
+    document.getElementById("disponibles").textContent =
+        disponibles;
+
 }
 
 actualizarDisponibles();
