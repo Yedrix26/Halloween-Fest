@@ -5,10 +5,7 @@
 
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Scanner - Halloween Fest</title>
 
@@ -67,7 +64,6 @@
             border-radius: 10px;
             font-size: 18px;
             font-weight: bold;
-            cursor: pointer;
         }
 
         #marcarUsado {
@@ -120,16 +116,11 @@
 
 </div>
 
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<script
-    src="https://unpkg.com/html5-qrcode"
-    type="text/javascript"
-></script>
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
 <script src="config.js"></script>
-
 
 <script>
 
@@ -154,20 +145,16 @@ function iniciarScanner() {
     scanner = new Html5Qrcode("reader");
 
     scanner.start(
-
         {
             facingMode: "environment"
         },
-
         {
             fps: 10,
-
             qrbox: {
                 width: 250,
                 height: 250
             }
         },
-
         codigo => {
 
             if (!escaneando) {
@@ -179,10 +166,7 @@ function iniciarScanner() {
             verificarQR(codigo);
 
         },
-
-        error => {
-            // Ignorar errores normales de lectura
-        }
+        error => {}
 
     )
     .then(() => {
@@ -192,10 +176,7 @@ function iniciarScanner() {
     })
     .catch(error => {
 
-        console.error(
-            "ERROR CAMARA:",
-            error
-        );
+        console.error("ERROR CAMARA:", error);
 
         mostrarError(
             "❌ NO SE PUDO ABRIR LA CÁMARA<br><br>" +
@@ -213,23 +194,21 @@ function iniciarScanner() {
 
 async function verificarQR(codigo) {
 
+    console.log("QR LEÍDO:", codigo);
+
     try {
 
         if (scanner) {
-
             try {
                 await scanner.stop();
             } catch (e) {}
-
         }
 
+        // =============================================
+        // SACAR ID DEL QR
+        // =============================================
 
         let id = null;
-
-
-        // ---------------------------------------------
-        // OBTENER ID DEL QR
-        // ---------------------------------------------
 
         try {
 
@@ -239,17 +218,43 @@ async function verificarQR(codigo) {
 
         } catch (e) {
 
-            mostrarError(
-                "❌ QR NO VÁLIDO"
+            console.log(
+                "No se pudo interpretar como URL."
             );
-
-            return;
 
         }
 
+        // =============================================
+        // SEGUNDO MÉTODO PARA OBTENER EL ID
+        // =============================================
 
         if (!id) {
 
+            const encontrado =
+                String(codigo).match(
+                    /[?&]id=([0-9]+)/
+                );
+
+            if (encontrado) {
+                id = encontrado[1];
+            }
+
+        }
+
+        // =============================================
+        // CONVERTIR A NÚMERO
+        // =============================================
+
+        id = Number(id);
+
+        console.log("ID OBTENIDO:", id);
+
+        // =============================================
+        // VALIDAR ID
+        // =============================================
+
+        if (!Number.isInteger(id) || id <= 0) {
+
             mostrarError(
                 "❌ QR NO VÁLIDO"
             );
@@ -258,43 +263,37 @@ async function verificarQR(codigo) {
 
         }
 
+        // =============================================
+        // CONSULTAR BOLETO
+        // =============================================
 
-        console.log(
-            "ID ESCANEADO:",
-            id
-        );
-
-
-        // ---------------------------------------------
-        // CONSULTAR BOLETO MEDIANTE RPC
-        // ---------------------------------------------
-
-        const { data, error } =
+        const respuesta =
             await supabaseClient.rpc(
                 "obtener_boleto",
                 {
-                    p_id: Number(id)
+                    p_id: id
                 }
             );
 
+        const data = respuesta.data;
+
+        const error = respuesta.error;
 
         console.log(
-            "RESPUESTA RPC:",
+            "DATOS:",
             data
         );
 
         console.log(
-            "ERROR RPC:",
+            "ERROR:",
             error
         );
 
+        // =============================================
+        // ERROR
+        // =============================================
 
         if (error) {
-
-            console.error(
-                "ERROR AL VERIFICAR:",
-                error
-            );
 
             mostrarError(
                 "❌ ERROR AL VERIFICAR BOLETO<br><br>" +
@@ -305,6 +304,9 @@ async function verificarQR(codigo) {
 
         }
 
+        // =============================================
+        // NO EXISTE
+        // =============================================
 
         if (!data || data.length === 0) {
 
@@ -316,29 +318,29 @@ async function verificarQR(codigo) {
 
         }
 
+        // =============================================
+        // GUARDAR BOLETO
+        // =============================================
 
         const boleto = data[0];
 
-
         boletoActual = boleto;
-
 
         console.log(
             "BOLETO ENCONTRADO:",
             boleto
         );
 
-
-        // =================================================
-        // BOLETO YA USADO
-        // =================================================
+        // =============================================
+        // YA USADO
+        // =============================================
 
         if (boleto.estado === "Usado") {
 
             document.getElementById(
                 "resultado"
-            ).className = "resultado usado";
-
+            ).className =
+                "resultado usado";
 
             document.getElementById(
                 "resultado"
@@ -363,27 +365,24 @@ async function verificarQR(codigo) {
 
             `;
 
-
             document.getElementById(
                 "marcarUsado"
             ).style.display = "none";
-
 
             return;
 
         }
 
-
-        // =================================================
-        // BOLETO CONFIRMADO
-        // =================================================
+        // =============================================
+        // CONFIRMADO
+        // =============================================
 
         if (boleto.estado === "Confirmado") {
 
             document.getElementById(
                 "resultado"
-            ).className = "resultado valido";
-
+            ).className =
+                "resultado valido";
 
             document.getElementById(
                 "resultado"
@@ -417,16 +416,13 @@ async function verificarQR(codigo) {
 
             `;
 
-
             document.getElementById(
                 "marcarUsado"
             ).style.display = "block";
 
-
             return;
 
         }
-
 
         mostrarError(
             "❌ BOLETO NO CONFIRMADO"
@@ -451,7 +447,7 @@ async function verificarQR(codigo) {
 
 
 // =====================================================
-// MARCAR BOLETO COMO USADO
+// MARCAR COMO USADO
 // =====================================================
 
 async function marcarComoUsado() {
@@ -466,32 +462,26 @@ async function marcarComoUsado() {
 
     }
 
-
     const confirmar = confirm(
         "¿Seguro que quieres marcar el boleto #" +
         boletoActual.id +
         " como USADO?"
     );
 
-
     if (!confirmar) {
         return;
     }
-
 
     const { data, error } =
         await supabaseClient.rpc(
             "marcar_boleto_usado",
             {
-                p_id: Number(
-                    boletoActual.id
-                )
+                p_id: Number(boletoActual.id)
             }
         );
 
-
     console.log(
-        "MARCAR USADO:",
+        "RESULTADO:",
         data
     );
 
@@ -499,7 +489,6 @@ async function marcarComoUsado() {
         "ERROR:",
         error
     );
-
 
     if (error) {
 
@@ -512,16 +501,14 @@ async function marcarComoUsado() {
 
     }
 
-
     alert(
         "✅ ¡Boleto marcado como USADO!"
     );
 
-
     document.getElementById(
         "resultado"
-    ).className = "resultado usado";
-
+    ).className =
+        "resultado usado";
 
     document.getElementById(
         "resultado"
@@ -545,7 +532,6 @@ async function marcarComoUsado() {
 
     `;
 
-
     document.getElementById(
         "marcarUsado"
     ).style.display = "none";
@@ -563,35 +549,27 @@ async function nuevoEscaneo() {
         "resultado"
     ).innerHTML = "";
 
-
     document.getElementById(
         "resultado"
     ).className = "";
-
 
     document.getElementById(
         "marcarUsado"
     ).style.display = "none";
 
-
     boletoActual = null;
-
 
     try {
 
         if (scanner) {
-
             await scanner.clear();
-
         }
 
     } catch (e) {}
 
-
     document.getElementById(
         "reader"
     ).innerHTML = "";
-
 
     iniciarScanner();
 
@@ -599,15 +577,15 @@ async function nuevoEscaneo() {
 
 
 // =====================================================
-// MOSTRAR ERROR
+// ERROR
 // =====================================================
 
 function mostrarError(mensaje) {
 
     document.getElementById(
         "resultado"
-    ).className = "resultado invalido";
-
+    ).className =
+        "resultado invalido";
 
     document.getElementById(
         "resultado"
