@@ -343,15 +343,44 @@ async function marcarComoUsado() {
         .eq("id", boletoActual.id);
 
 
-    if (error) {
+   async function marcarComoUsado() {
 
+    if (!boletoActual) {
+        alert("❌ No hay ningún boleto seleccionado.");
+        return;
+    }
+
+    const confirmar = confirm(
+        "¿Seguro que quieres marcar este boleto como USADO?"
+    );
+
+    if (!confirmar) {
+        return;
+    }
+
+    const { data, error } = await supabaseClient
+        .rpc("marcar_boleto_usado", {
+            p_id: boletoActual.id
+        });
+
+    if (error) {
         alert(
             "❌ Error al marcar el boleto:\n\n" +
             error.message
         );
-
         return;
     }
+
+    alert("✅ ¡Boleto marcado como USADO!");
+
+    document.getElementById("resultado").innerHTML = `
+        <h2>🟢 BOLETO USADO</h2>
+        <p><strong>Boleto #${boletoActual.id}</strong></p>
+        <p>Este boleto ya fue registrado como utilizado.</p>
+    `;
+
+    document.getElementById("botonUsar").style.display = "none";
+}
 
 
     document.getElementById("resultado").className =
