@@ -230,12 +230,15 @@ async function verificarQR(codigo) {
 
     if (error) {
 
-        console.error("ERROR SUPABASE:", error);
+    console.error("ERROR SUPABASE:", error);
 
-        mostrarError("❌ ERROR AL VERIFICAR BOLETO");
+    mostrarError(
+        "❌ ERROR AL VERIFICAR BOLETO<br><br>" +
+        error.message
+    );
 
-        return;
-    }
+    return;
+}
 
 
     if (!data || data.length === 0) {
