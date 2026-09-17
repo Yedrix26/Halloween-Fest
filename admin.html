@@ -11,12 +11,16 @@
             font-family: Arial, sans-serif;
             background: #050505;
             color: white;
-            padding: 30px;
+            padding: 20px;
         }
 
         h1 {
             text-align: center;
             margin-bottom: 30px;
+        }
+
+        h2 {
+            margin-top: 30px;
         }
 
         .login,
@@ -36,6 +40,7 @@
             border: none;
             border-radius: 8px;
             font-size: 16px;
+            box-sizing: border-box;
         }
 
         button {
@@ -46,6 +51,11 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .botonSecundario {
+            background: #333;
         }
 
         .error {
@@ -55,6 +65,10 @@
 
         .boleto p {
             margin: 8px 0;
+        }
+
+        .seccion {
+            margin-top: 30px;
         }
     </style>
 </head>
@@ -97,12 +111,37 @@
 
     <div id="panel" style="display:none;">
 
-        <button onclick="cerrarSesion()">
+        <button
+            class="botonSecundario"
+            onclick="cerrarSesion()"
+        >
             🚪 CERRAR SESIÓN
         </button>
 
-        <div id="listaBoletos">
-            Cargando boletos...
+
+        <!-- PENDIENTES -->
+
+        <div class="seccion">
+
+            <h2>🟡 Pagos pendientes</h2>
+
+            <div id="listaPendientes">
+                Cargando...
+            </div>
+
+        </div>
+
+
+        <!-- CONFIRMADOS -->
+
+        <div class="seccion">
+
+            <h2>🟢 Boletos confirmados</h2>
+
+            <div id="listaConfirmados">
+                Cargando...
+            </div>
+
         </div>
 
     </div>
@@ -121,49 +160,62 @@
             );
 
 
+        // =========================
         // INICIAR SESIÓN
+        // =========================
 
         async function iniciarSesion() {
 
             const email =
-                document.getElementById("email").value.trim();
+                document.getElementById("email")
+                    .value
+                    .trim();
 
             const password =
-                document.getElementById("password").value;
+                document.getElementById("password")
+                    .value;
 
 
             if (!email || !password) {
 
-                document.getElementById("errorLogin").textContent =
+                document.getElementById(
+                    "errorLogin"
+                ).textContent =
                     "Completa correo y contraseña.";
 
                 return;
             }
 
 
-            const { data, error } =
-                await supabaseClient.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
+            const { error } =
+                await supabaseClient.auth
+                    .signInWithPassword({
+                        email: email,
+                        password: password
+                    });
 
 
             if (error) {
 
                 console.error(error);
 
-                document.getElementById("errorLogin").textContent =
+                document.getElementById(
+                    "errorLogin"
+                ).textContent =
                     "❌ Correo o contraseña incorrectos.";
 
                 return;
             }
 
 
-            document.getElementById("login").style.display =
-                "none";
+            document.getElementById(
+                "login"
+            ).style.display = "none";
 
-            document.getElementById("panel").style.display =
-                "block";
+
+            document.getElementById(
+                "panel"
+            ).style.display = "block";
 
 
             cargarBoletos();
@@ -171,9 +223,26 @@
         }
 
 
-        // CARGAR BOLETOS PENDIENTES
+
+        // =========================
+        // CARGAR BOLETOS
+        // =========================
 
         async function cargarBoletos() {
+
+            cargarPendientes();
+
+            cargarConfirmados();
+
+        }
+
+
+
+        // =========================
+        // PENDIENTES
+        // =========================
+
+        async function cargarPendientes() {
 
             const { data, error } =
                 await supabaseClient
@@ -189,19 +258,21 @@
                     });
 
 
+            const lista =
+                document.getElementById(
+                    "listaPendientes"
+                );
+
+
             if (error) {
 
                 console.error(error);
 
-                document.getElementById("listaBoletos").innerHTML =
-                    "<p>❌ Error al cargar boletos.</p>";
+                lista.innerHTML =
+                    "<p>❌ Error al cargar.</p>";
 
                 return;
             }
-
-
-            const lista =
-                document.getElementById("listaBoletos");
 
 
             if (!data || data.length === 0) {
@@ -236,11 +307,6 @@
                     </p>
 
                     <p>
-                        <strong>Correo:</strong>
-                        ${boleto.Correo}
-                    </p>
-
-                    <p>
                         <strong>Teléfono:</strong>
                         ${boleto.Telefono}
                     </p>
@@ -260,12 +326,9 @@
                         ${boleto.Referencia}
                     </p>
 
-                    <p>
-                        <strong>Estado:</strong>
-                        ${boleto.Estado}
-                    </p>
-
-                    <button onclick="autorizar(${boleto.id})">
+                    <button
+                        onclick="autorizar(${boleto.id})"
+                    >
                         ✅ AUTORIZAR PAGO
                     </button>
 
@@ -279,7 +342,10 @@
         }
 
 
-        // AUTORIZAR PAGO
+
+        // =========================
+        // AUTORIZAR
+        // =========================
 
         async function autorizar(id) {
 
@@ -318,17 +384,16 @@
             }
 
 
-            const {
-                error
-            } = await supabaseClient
+            const { error } =
+                await supabaseClient
 
-                .from("Boletos")
+                    .from("Boletos")
 
-                .update({
-                    Estado: "Confirmado"
-                })
+                    .update({
+                        Estado: "Confirmado"
+                    })
 
-                .eq("id", id);
+                    .eq("id", id);
 
 
             if (error) {
@@ -336,7 +401,7 @@
                 console.error(error);
 
                 alert(
-                    "❌ Error al autorizar el pago."
+                    "❌ Error al autorizar."
                 );
 
                 return;
@@ -348,32 +413,7 @@
             );
 
 
-            const boletoUrl =
-                new URL(
-                    "ticket.html?id=" + id,
-                    window.location.href
-                ).href;
-
-
-            const telefono =
-                String(boleto.Telefono)
-                    .replace(/\D/g, "");
-
-
-            const mensaje =
-                "🎃 ¡Tu boleto para Halloween Fest está confirmado!%0A%0A" +
-                "🎟️ Boleto #" + id + "%0A%0A" +
-                "Aquí puedes abrir tu boleto y mostrar tu QR en la entrada:%0A" +
-                boletoUrl;
-
-
-            window.open(
-                "https://wa.me/52" +
-                telefono +
-                "?text=" +
-                mensaje,
-                "_blank"
-            );
+            enviarWhatsApp(boleto);
 
 
             cargarBoletos();
@@ -381,7 +421,183 @@
         }
 
 
+
+        // =========================
+        // REENVIAR BOLETO
+        // =========================
+
+        function enviarWhatsApp(boleto) {
+
+            const boletoUrl =
+                new URL(
+                    "ticket.html?id=" +
+                    boleto.id,
+                    window.location.href
+                ).href;
+
+
+            let telefono =
+                String(boleto.Telefono)
+                    .replace(/\D/g, "");
+
+
+            // Si el número tiene 10 dígitos,
+            // agregamos México
+
+            if (telefono.length === 10) {
+                telefono = "52" + telefono;
+            }
+
+
+            const mensaje =
+                "🎃 ¡Tu boleto para Halloween Fest está confirmado!%0A%0A" +
+
+                "🎟️ Boleto #" +
+                boleto.id +
+                "%0A" +
+
+                "👤 Nombre: " +
+                boleto.Nombre +
+                "%0A" +
+
+                "🎫 Cantidad: " +
+                boleto.Cantidad +
+                "%0A%0A" +
+
+                "👉 ABRIR MI BOLETO:%0A" +
+
+                boletoUrl;
+
+
+            window.open(
+                "https://wa.me/" +
+                telefono +
+                "?text=" +
+                mensaje,
+                "_blank"
+            );
+
+        }
+
+
+
+        // =========================
+        // CONFIRMADOS
+        // =========================
+
+        async function cargarConfirmados() {
+
+            const {
+                data,
+                error
+            } = await supabaseClient
+
+                .from("Boletos")
+
+                .select("*")
+
+                .eq("Estado", "Confirmado")
+
+                .order("id", {
+                    ascending: false
+                });
+
+
+            const lista =
+                document.getElementById(
+                    "listaConfirmados"
+                );
+
+
+            if (error) {
+
+                console.error(error);
+
+                lista.innerHTML =
+                    "<p>❌ Error al cargar.</p>";
+
+                return;
+            }
+
+
+            if (!data || data.length === 0) {
+
+                lista.innerHTML =
+                    "<p>No hay boletos confirmados.</p>";
+
+                return;
+            }
+
+
+            lista.innerHTML = "";
+
+
+            data.forEach(boleto => {
+
+                const div =
+                    document.createElement("div");
+
+                div.className = "boleto";
+
+
+                div.innerHTML = `
+
+                    <h2>
+                        🎟️ Boleto #${boleto.id}
+                    </h2>
+
+                    <p>
+                        <strong>Nombre:</strong>
+                        ${boleto.Nombre}
+                    </p>
+
+                    <p>
+                        <strong>Teléfono:</strong>
+                        ${boleto.Telefono}
+                    </p>
+
+                    <p>
+                        <strong>Cantidad:</strong>
+                        ${boleto.Cantidad}
+                    </p>
+
+                    <p>
+                        <strong>Referencia:</strong>
+                        ${boleto.Referencia}
+                    </p>
+
+                    <button
+                        onclick='reenviar(${JSON.stringify(boleto)})'
+                    >
+                        📲 REENVIAR BOLETO
+                    </button>
+
+                `;
+
+
+                lista.appendChild(div);
+
+            });
+
+        }
+
+
+
+        // =========================
+        // REENVIAR
+        // =========================
+
+        function reenviar(boleto) {
+
+            enviarWhatsApp(boleto);
+
+        }
+
+
+
+        // =========================
         // CERRAR SESIÓN
+        // =========================
 
         async function cerrarSesion() {
 
