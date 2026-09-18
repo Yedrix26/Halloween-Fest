@@ -393,7 +393,7 @@ async function actualizarDisponibles() {
     const { data, error } = await supabaseClient
         .from("Boletos")
         .select("Cantidad")
-        .eq("Estado", "Confirmado");
+       .in("Estado", ["Confirmado", "Usado"]);
 
 
     if (error) {
@@ -452,7 +452,7 @@ actualizarTotal();
     const { data, error } = await supabaseClient
         .from("Boletos")
         .select("Cantidad")
-        .eq("Estado", "Confirmado");
+        .in("Estado", ["Confirmado", "Usado"]);
 
     if (error) {
         console.error(
