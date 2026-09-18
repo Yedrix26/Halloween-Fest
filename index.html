@@ -1,24 +1,52 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>HALLOWEEN FEST</title>
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>DEMON FEST</title>
+
+    <!-- Tipografías -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Creepster&family=Montserrat:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: "Montserrat", Arial, sans-serif;
             background: #050505;
             color: white;
             text-align: center;
+            overflow-x: hidden;
         }
+
+        /* =========================
+           HERO
+        ========================= */
 
         .hero {
             min-height: 100vh;
@@ -26,87 +54,315 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 30px 20px;
+
+            padding: 40px 20px;
+
+            position: relative;
 
             background:
-                linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.85)),
-                url("https://images.unsplash.com/photo-1509557965875-b88c97052f0e?auto=format&fit=crop&w=1600&q=80");
+                linear-gradient(
+                    rgba(0,0,0,.45),
+                    rgba(0,0,0,.92)
+                ),
+                url("https://images.unsplash.com/photo-1509557965875-b88c97052f0e?auto=format&fit=crop&w=1800&q=85");
 
             background-size: cover;
             background-position: center;
         }
 
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+
+            background:
+                radial-gradient(
+                    circle at center,
+                    transparent 20%,
+                    rgba(0,0,0,.75) 100%
+                );
+
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 900px;
+        }
+
         .tag {
-            font-size: 14px;
-            letter-spacing: 4px;
-            margin-bottom: 15px;
+            font-size: 13px;
+            letter-spacing: 5px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-transform: uppercase;
         }
 
         h1 {
-            font-size: clamp(55px, 12vw, 120px);
-            line-height: .9;
-            text-shadow: 0 0 25px #ff5e00;
+            font-family: "Creepster", cursive;
+            font-size: clamp(80px, 17vw, 190px);
+            line-height: .75;
+            letter-spacing: 5px;
+
+            color: #fff;
+
+            text-shadow:
+                0 0 8px #ff1a00,
+                0 0 25px #ff1a00,
+                0 0 55px rgba(255,0,0,.7);
         }
 
-        h2 {
-            margin-top: 25px;
+        .hero-subtitle {
+            margin-top: 35px;
+            font-size: clamp(18px, 3vw, 28px);
+            font-weight: 700;
+            letter-spacing: 2px;
         }
 
-        .info {
+        .hero-info {
+            margin-top: 22px;
+            font-size: 15px;
+            color: #ddd;
+        }
+
+        .hero-date {
             margin-top: 20px;
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 2px;
         }
+
+        /* =========================
+           BOTONES
+        ========================= */
 
         .button {
             display: inline-block;
-            margin-top: 30px;
+
+            margin-top: 32px;
             padding: 17px 35px;
-            background: #ff5e00;
+
+            background: #d40000;
             color: white;
-            border: none;
-            border-radius: 50px;
-            font-weight: bold;
-            font-size: 18px;
+
+            border: 1px solid #ff3b1f;
+            border-radius: 8px;
+
+            font-weight: 900;
+            font-size: 17px;
+
+            text-decoration: none;
             cursor: pointer;
-            box-shadow: 0 0 25px #ff5e00;
+
+            box-shadow:
+                0 0 15px rgba(255,0,0,.5),
+                inset 0 0 15px rgba(255,255,255,.05);
+
+            transition: .2s;
         }
 
-        .section {
-            padding: 60px 20px;
-            background: #0c0c0c;
+        .button:hover {
+            transform: translateY(-2px);
+            background: #f00000;
+            box-shadow:
+                0 0 30px rgba(255,0,0,.7);
         }
+
+        /* =========================
+           SECCIONES
+        ========================= */
+
+        .section {
+            padding: 80px 20px;
+            background: #080808;
+            border-top: 1px solid #1c1c1c;
+        }
+
+        .section:nth-child(even) {
+            background: #050505;
+        }
+
+        .section-title {
+            font-family: "Creepster", cursive;
+            font-size: 48px;
+            letter-spacing: 2px;
+
+            color: white;
+
+            text-shadow:
+                0 0 12px #ff0000;
+        }
+
+        .section-subtitle {
+            margin-top: 12px;
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        /* =========================
+           CARDS
+        ========================= */
 
         .cards {
             display: flex;
             justify-content: center;
             gap: 20px;
             flex-wrap: wrap;
-            margin-top: 30px;
+
+            max-width: 1000px;
+            margin: 40px auto 0;
         }
 
         .card {
             width: 280px;
-            padding: 30px 20px;
-            background: #151515;
-            border: 1px solid #333;
-            border-radius: 20px;
+
+            padding: 30px 22px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #171717,
+                    #0b0b0b
+                );
+
+            border: 1px solid #2b2b2b;
+            border-radius: 14px;
+
+            box-shadow:
+                0 10px 30px rgba(0,0,0,.4);
+
+            transition: .2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: #b30000;
+            box-shadow:
+                0 0 25px rgba(255,0,0,.15);
         }
 
         .card h3 {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            font-size: 20px;
         }
 
+        .card p {
+            color: #aaa;
+            line-height: 1.6;
+        }
+
+        /* =========================
+           PRECIOS
+        ========================= */
+
+        .precios {
+            max-width: 750px;
+            margin: 40px auto;
+
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .precio-card {
+            width: 300px;
+
+            padding: 28px 20px;
+
+            background: #111;
+            border: 1px solid #3a3a3a;
+            border-radius: 14px;
+        }
+
+        .precio-card.destacado {
+            border-color: #d40000;
+
+            box-shadow:
+                0 0 25px rgba(255,0,0,.18);
+        }
+
+        .precio-label {
+            font-size: 13px;
+            letter-spacing: 2px;
+            font-weight: 800;
+            color: #aaa;
+        }
+
+        .precio {
+            margin-top: 8px;
+
+            font-size: 42px;
+            font-weight: 900;
+
+            color: #fff;
+        }
+
+        .precio-card p {
+            margin-top: 8px;
+            color: #888;
+        }
+
+        /* =========================
+           COMPRA
+        ========================= */
+
         .purchase {
-            max-width: 420px;
-            margin: 30px auto;
+            max-width: 500px;
+            margin: 40px auto 0;
+
+            padding: 35px 25px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #171717,
+                    #0b0b0b
+                );
+
+            border: 1px solid #333;
+            border-radius: 16px;
+
+            box-shadow:
+                0 15px 50px rgba(0,0,0,.5);
+        }
+
+        .purchase-title {
+            font-size: 25px;
+            font-weight: 900;
+            margin-bottom: 25px;
         }
 
         input {
             width: 100%;
-            padding: 15px;
+
+            padding: 16px;
             margin-bottom: 15px;
-            border: none;
+
+            background: #080808;
+            color: white;
+
+            border: 1px solid #333;
             border-radius: 8px;
-            font-size: 16px;
+
+            font-size: 15px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #d40000;
+            box-shadow: 0 0 10px rgba(255,0,0,.15);
+        }
+
+        input::placeholder {
+            color: #777;
+        }
+
+        .quantity-title {
+            margin-top: 10px;
+            color: #aaa;
+            font-size: 14px;
         }
 
         .quantity {
@@ -114,286 +370,645 @@
             justify-content: center;
             align-items: center;
             gap: 25px;
+
             margin: 20px 0;
         }
 
         .quantity button {
-            width: 45px;
-            height: 45px;
+            width: 48px;
+            height: 48px;
+
+            border: 1px solid #555;
+            border-radius: 8px;
+
+            background: #191919;
+            color: white;
+
             font-size: 25px;
             cursor: pointer;
         }
 
+        .quantity button:hover {
+            background: #d40000;
+        }
+
         #cantidad {
+            min-width: 40px;
             font-size: 28px;
+            font-weight: 900;
+        }
+
+        .total-box {
+            margin-top: 25px;
+            padding: 18px;
+
+            background: #090909;
+            border: 1px solid #292929;
+            border-radius: 10px;
+        }
+
+        .total-label {
+            color: #aaa;
+            font-size: 14px;
         }
 
         #total {
-            font-size: 22px;
+            font-size: 32px;
+            font-weight: 900;
         }
 
-        .footer {
-            padding: 30px;
-            background: #000;
+        .aviso-precio {
+            margin-top: 15px;
+            color: #aaa;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        /* =========================
+           RIFA
+        ========================= */
+
+        .rifa {
+            max-width: 700px;
+            margin: 45px auto 0;
+
+            padding: 25px 20px;
+
+            background: #110606;
+            border: 1px solid #6d0000;
+            border-radius: 12px;
+        }
+
+        .rifa h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .rifa p {
+            color: #bbb;
+            line-height: 1.6;
+        }
+
+        /* =========================
+           PAGO
+        ========================= */
+
+        #instruccionesPago {
+            max-width: 500px;
+            margin: 25px auto 0;
+
+            padding: 30px 22px;
+
+            background: #101010;
+
+            border: 1px solid #d40000;
+            border-radius: 15px;
+
+            box-shadow:
+                0 0 25px rgba(255,0,0,.12);
+        }
+
+        #instruccionesPago h2 {
+            font-family: "Creepster", cursive;
+            font-size: 34px;
+            margin-bottom: 15px;
+        }
+
+        .pago-dato {
+            margin: 13px 0;
+            color: #ccc;
+        }
+
+        .referencia {
+            margin-top: 20px;
+            padding: 15px;
+
+            background: #050505;
+            border: 1px dashed #d40000;
+            border-radius: 8px;
+
+            font-size: 20px;
+            font-weight: 900;
+        }
+
+        .pago-pasos {
+            margin-top: 20px;
+            text-align: left;
+
+            color: #aaa;
+            line-height: 1.8;
+        }
+
+        /* =========================
+           DISPONIBLES
+        ========================= */
+
+        .disponibles {
+            margin-top: 30px;
+
+            font-size: 15px;
             color: #aaa;
         }
+
+        #disponibles {
+            color: white;
+            font-weight: 900;
+        }
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        .footer {
+            padding: 35px 20px;
+
+            background: #000;
+
+            color: #666;
+
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        .footer strong {
+            color: #aaa;
+        }
+
+        /* =========================
+           CELULAR
+        ========================= */
+
+        @media (max-width: 600px) {
+
+            .hero {
+                min-height: 90vh;
+            }
+
+            h1 {
+                font-size: 82px;
+            }
+
+            .section {
+                padding: 60px 15px;
+            }
+
+            .section-title {
+                font-size: 40px;
+            }
+
+            .card {
+                width: 100%;
+                max-width: 360px;
+            }
+
+            .precio-card {
+                width: 100%;
+                max-width: 360px;
+            }
+
+            .purchase {
+                padding: 28px 18px;
+            }
+
+        }
+
     </style>
 
-    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-    <script src="config.js"></script>
 </head>
+
 
 <body>
 
-    <!-- PORTADA -->
 
-    <section class="hero">
+<!-- =========================
+     PORTADA
+========================= -->
+
+<section class="hero">
+
+    <div class="hero-content">
 
         <div class="tag">
-            🎃 EL EVENTO DEL AÑO 🎃
+            ☠️ EL EVENTO DEL AÑO ☠️
         </div>
 
         <h1>
-            HALLOWEEN<br>
+            DEMON<br>
             FEST
         </h1>
 
-        <h2>
-            La fiesta que no vas a olvidar
-        </h2>
+        <p class="hero-subtitle">
+            GOOD PEOPLE. BAD HABITS.
+        </p>
 
-        <div class="info">
-            🎧 DJs en vivo | 👻 Concurso de disfraces
-        </div>
+        <p class="hero-info">
+            🎧 DJs EN VIVO &nbsp; • &nbsp;
+            👹 CONCURSO DE DISFRACES &nbsp; • &nbsp;
+            🔥 UNA NOCHE SIN REGLAS
+        </p>
 
-        <a href="#compra" class="button">
-            🎟️ COMPRAR BOLETO
+        <p class="hero-date">
+            31 OCTUBRE 2026 · SALTILLO
+        </p>
+
+        <a
+            href="#compra"
+            class="button"
+        >
+            🎟️ CONSEGUIR BOLETO
         </a>
 
-        <p style="margin-top:20px;">
-            🔥 Capacidad limitada — 500 personas
+        <p style="margin-top:20px; color:#aaa;">
+            Capacidad limitada — <strong>500 personas</strong>
         </p>
 
-    </section>
+    </div>
+
+</section>
 
 
-    <!-- ORGANIZADORES -->
+<!-- =========================
+     ORGANIZADORES
+========================= -->
 
-    <section class="section">
+<section class="section">
 
-        <h2>ORGANIZADORES</h2>
+    <h2 class="section-title">
+        LOS QUE LO HACEN POSIBLE
+    </h2>
 
-        <div class="cards">
+    <p class="section-subtitle">
+        ORGANIZACIÓN DEMON FEST
+    </p>
 
-            <div class="card">
-                <h3>Francisco</h3>
-                <p>Organizador</p>
+    <div class="cards">
+
+        <div class="card">
+            <h3>Francisco</h3>
+            <p>Organizador</p>
+        </div>
+
+        <div class="card">
+            <h3>Coffi</h3>
+            <p>Organizador</p>
+        </div>
+
+        <div class="card">
+            <h3>Alejandro</h3>
+            <p>Organizador</p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     EXPERIENCIA
+========================= -->
+
+<section class="section">
+
+    <h2 class="section-title">
+        ¿QUÉ TE ESPERA?
+    </h2>
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>🎧 DJs EN VIVO</h3>
+            <p>
+                Música toda la noche y ambiente de festival.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>👹 CONCURSO</h3>
+            <p>
+                Ven con tu mejor disfraz y demuestra quién domina la noche.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>🔥 DEMON EXPERIENCE</h3>
+            <p>
+                Una noche diseñada para que Halloween no vuelva a ser igual.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     PRECIOS
+========================= -->
+
+<section class="section">
+
+    <h2 class="section-title">
+        BOLETOS
+    </h2>
+
+    <p class="section-subtitle">
+        ENTRE MÁS PRONTO COMPRES, MEJOR PRECIO
+    </p>
+
+    <div class="precios">
+
+        <div class="precio-card destacado">
+
+            <div class="precio-label">
+                PRIMEROS 100 BOLETOS
             </div>
 
-            <div class="card">
-                <h3>Coffi</h3>
-                <p>Organizador</p>
+            <div class="precio">
+                $150
             </div>
 
-            <div class="card">
-                <h3>Alejandro</h3>
-                <p>Organizador</p>
-            </div>
+            <p>MXN por boleto</p>
 
         </div>
 
-    </section>
 
+        <div class="precio-card">
 
-    <!-- EXPERIENCIA -->
-
-    <section class="section">
-
-        <h2>¿QUÉ TE ESPERA?</h2>
-
-        <div class="cards">
-
-            <div class="card">
-                <h3>🎧 DJs</h3>
-                <p>
-                    Música toda la noche y ambiente de festival.
-                </p>
+            <div class="precio-label">
+                DESPUÉS DEL BOLETO 100
             </div>
 
-            <div class="card">
-                <h3>👻 Disfraces</h3>
-                <p>
-                    Ven con tu mejor disfraz y participa por premios.
-                </p>
+            <div class="precio">
+                $200
             </div>
 
-            <div class="card">
-                <h3>🔥 Experiencia</h3>
-                <p>
-                    Una noche que vas a querer repetir.
-                </p>
-            </div>
+            <p>MXN por boleto</p>
 
         </div>
 
-    </section>
+    </div>
+
+</section>
 
 
-    <!-- COMPRA -->
+<!-- =========================
+     COMPRA
+========================= -->
 
-    <section class="section" id="compra">
+<section
+    class="section"
+    id="compra"
+>
 
-        <h2>🎟️ COMPRA TU BOLETO</h2>
+    <h2 class="section-title">
+        CONSEGUIR BOLETO
+    </h2>
 
-        <p style="margin-top:20px;">
-            🎟️ PRIMEROS 100 BOLETOS
+    <p class="section-subtitle">
+        PAGO ÚNICAMENTE POR TRANSFERENCIA BANCARIA
+    </p>
+
+
+    <div class="card purchase">
+
+        <div class="purchase-title">
+            🎟️ DATOS DEL BOLETO
+        </div>
+
+
+        <input
+            id="nombre"
+            type="text"
+            placeholder="Nombre completo"
+        >
+
+
+        <input
+            id="correo"
+            type="email"
+            placeholder="Correo electrónico"
+        >
+
+
+        <input
+            id="telefono"
+            type="tel"
+            placeholder="Número de teléfono"
+        >
+
+
+        <p class="quantity-title">
+            Cantidad de boletos
         </p>
 
-        <h3 style="font-size:32px; margin-top:10px;">
-            $100 MXN
-        </h3>
 
-        <p style="margin-top:20px;">
-            ⚡ Después de los primeros 100
-        </p>
-
-        <h3 style="font-size:28px; margin-top:10px;">
-            $150 MXN
-        </h3>
-
-        <p style="margin-top:20px;">
-            🔥 ¡Compra antes de que suba el precio!
-        </p>
-
-
-        <div class="card purchase">
-
-            <input
-                id="nombre"
-                type="text"
-                placeholder="Nombre completo"
-            >
-
-            <input
-                id="correo"
-                type="email"
-                placeholder="Correo electrónico"
-            >
-
-            <input
-                id="telefono"
-                type="tel"
-                placeholder="Número de teléfono"
-            >
-
-
-            <p>
-                Cantidad de boletos
-            </p>
-
-
-            <div class="quantity">
-
-                <button type="button" onclick="cambiarCantidad(-1)">
-                    −
-                </button>
-
-                <span id="cantidad">
-                    1
-                </span>
-
-                <button type="button" onclick="cambiarCantidad(1)">
-                    +
-                </button>
-
-            </div>
-
-
-            <p>
-                Total:
-                <strong>
-                    $<span id="total">100</span> MXN
-                </strong>
-            </p>
-
+        <div class="quantity">
 
             <button
                 type="button"
-                class="button"
-                onclick="continuarPago()"
-                >
+                onclick="cambiarCantidad(-1)"
+            >
+                −
+            </button>
 
-    <h2>🎟️ ¡Boleto confirmado!</h2>
-    <p>Presenta este QR en la entrada.</p>
+            <span id="cantidad">
+                1
+            </span>
 
-    <div id="qrcode" style="margin:20px auto;"></div>
-
-    <p><strong>ID del boleto:</strong> <span id="idBoleto"></span></p>
-    <p><strong>Boletos:</strong> <span id="cantidadBoleto"></span></p>
-    <p><strong>Total:</strong> $<span id="totalBoleto"></span> MXN</p>
-</div>
-            
-                Pagar boleto
+            <button
+                type="button"
+                onclick="cambiarCantidad(1)"
+            >
+                +
             </button>
 
         </div>
-<div id="instruccionesPago" style="display:none; text-align:center; margin-top:25px;">
-    <h2>💸 Realiza tu transferencia</h2>
 
-    <p>Transfiere el total indicado a:</p>
 
-    <p><strong>Banco:</strong> </p>
-    <p><strong>Titular:</strong> Hector Alejandro Perez Beltran</p>
-    <p><strong>Cuenta / CLABE:</strong> TU CLABE</p>
+        <div class="total-box">
 
-    <p>
-        <strong>Referencia:</strong>
-        <span id="referenciaPago"></span>
-    </p>
+            <div class="total-label">
+                TOTAL
+            </div>
 
-    <p>Después de transferir, avísanos por WhatsApp.</p>
+            <div>
+                $<span id="total">150</span> MXN
+            </div>
 
-    <button type="button" onclick="avisarWhatsApp()">
-        📲 Ya hice mi transferencia
-    </button>
-</div>
+        </div>
 
-        <p style="margin-top:20px;">
-            🔥 Quedan <span id="disponibles">500</span> boletos disponibles
+
+        <p class="aviso-precio">
+            Los primeros 100 boletos cuestan $150 MXN.
+            Después el precio será de $200 MXN.
         </p>
 
-    </section>
 
+        <button
+            type="button"
+            class="button"
+            onclick="continuarPago()"
+        >
+            💸 CONTINUAR AL PAGO
+        </button>
 
-    <div class="footer">
-        HALLOWEEN FEST ©️ 2026
     </div>
 
 
-    <!-- JAVASCRIPT -->
+    <!-- RIFA -->
 
-    <script>
+    <div class="rifa">
 
-        // Conexión con Supabase
+        <h3>
+            🎁 ¡TU BOLETO PARTICIPA EN LA RIFA!
+        </h3>
 
-        const supabaseClient = supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_KEY
-        );
-console.log("URL DE SUPABASE:", SUPABASE_URL);
-console.log("CLIENTE SUPABASE:", supabaseClient);
+        <p>
+            Con tu compra participas automáticamente
+            para ganar increíbles premios durante el evento.
+            🏆 ¡Mucha suerte!
+        </p>
 
-        // Cantidad seleccionada
+    </div>
 
-        let cantidad = 1;
+
+    <!-- TRANSFERENCIA -->
+
+    <div
+        id="instruccionesPago"
+        style="display:none;"
+    >
+
+        <h2>
+            💸 REALIZA TU TRANSFERENCIA
+        </h2>
+
+        <p>
+            Tu boleto quedará pendiente hasta que
+            confirmemos el pago.
+        </p>
+
+        <div class="pago-pasos">
+
+            <strong>1.</strong>
+            Copia la referencia de pago.<br>
+
+            <strong>2.</strong>
+            Realiza la transferencia por el total indicado.<br>
+
+            <strong>3.</strong>
+            Pulsa “Ya hice mi transferencia”.<br>
+
+            <strong>4.</strong>
+            Verificaremos tu pago y te enviaremos
+            tu boleto por WhatsApp.
+
+        </div>
+
+
+        <div class="pago-dato">
+            <strong>Banco:</strong>
+            Próximamente
+        </div>
+
+
+        <div class="pago-dato">
+            <strong>Titular:</strong>
+            Hector Alejandro Perez Beltran
+        </div>
+
+
+        <div class="pago-dato">
+            <strong>Cuenta / CLABE:</strong>
+            Próximamente
+        </div>
+
+
+        <div class="referencia">
+
+            REFERENCIA:
+
+            <span id="referenciaPago"></span>
+
+        </div>
+
+
+        <button
+            type="button"
+            class="button"
+            onclick="avisarWhatsApp()"
+        >
+            📲 YA HICE MI TRANSFERENCIA
+        </button>
+
+    </div>
+
+
+    <p class="disponibles">
+
+        🔥 Quedan
+        <span id="disponibles">500</span>
+        boletos disponibles
+
+    </p>
+
+</section>
+
+
+<!-- =========================
+     FOOTER
+========================= -->
+
+<div class="footer">
+
+    <strong>DEMON FEST</strong>
+    © 2026
+
+</div>
+
+
+<!-- =========================
+     JAVASCRIPT
+========================= -->
+
+<script>
+
+const supabaseClient =
+    supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
+
+
+console.log(
+    "URL DE SUPABASE:",
+    SUPABASE_URL
+);
+
+
+// =========================
+// CANTIDAD
+// =========================
+
+let cantidad = 1;
+
+
+// =========================
+// DISPONIBILIDAD
+// =========================
+
 async function actualizarDisponibles() {
 
-    const { data, error } = await supabaseClient
+    const {
+        data,
+        error
+    } = await supabaseClient
         .from("Boletos")
         .select("Cantidad")
-       .in("Estado", ["Confirmado", "Usado"]);
+        .in(
+            "Estado",
+            ["Confirmado", "Usado"]
+        );
 
 
     if (error) {
@@ -407,175 +1022,315 @@ async function actualizarDisponibles() {
     }
 
 
-    const vendidos = data.reduce(
-        (total, boleto) => {
-            return total + Number(boleto.Cantidad);
-        },
-        0
-    );
+    const vendidos =
+        data.reduce(
+            (total, boleto) => {
+
+                return total +
+                    Number(
+                        boleto.Cantidad
+                    );
+
+            },
+            0
+        );
 
 
-    const disponibles = 500 - vendidos;
+    const disponibles =
+        500 - vendidos;
 
 
-    document.getElementById("disponibles").textContent =
-        disponibles;
+    document.getElementById(
+        "disponibles"
+    ).textContent =
+        Math.max(
+            0,
+            disponibles
+        );
 
 }
 
-actualizarDisponibles();
-actualizarTotal();
-        // Cambiar cantidad
 
-        function cambiarCantidad(numero) {
+// =========================
+// CAMBIAR CANTIDAD
+// =========================
 
-            cantidad += numero;
+function cambiarCantidad(numero) {
 
-            if (cantidad < 1) {
-                cantidad = 1;
-            }
-
-            if (cantidad > 10) {
-                cantidad = 10;
-            }
-
-            document.getElementById("cantidad").textContent = cantidad;
-
-            actualizarTotal();
-        }
+    cantidad += numero;
 
 
-        // Actualizar total
+    if (cantidad < 1) {
+        cantidad = 1;
+    }
 
-    async function actualizarTotal() {
 
-    const { data, error } = await supabaseClient
+    if (cantidad > 10) {
+        cantidad = 10;
+    }
+
+
+    document.getElementById(
+        "cantidad"
+    ).textContent =
+        cantidad;
+
+
+    actualizarTotal();
+
+}
+
+
+// =========================
+// CALCULAR TOTAL
+// =========================
+
+async function actualizarTotal() {
+
+    const {
+        data,
+        error
+    } = await supabaseClient
         .from("Boletos")
         .select("Cantidad")
-        .in("Estado", ["Confirmado", "Usado"]);
+        .in(
+            "Estado",
+            ["Confirmado", "Usado"]
+        );
+
 
     if (error) {
+
         console.error(
             "ERROR AL CALCULAR PRECIO:",
             error
         );
+
         return;
     }
 
-    const vendidos = data.reduce(
-        (total, boleto) => {
-            return total + Number(boleto.Cantidad);
-        },
-        0
-    );
 
-    if (vendidos + cantidad > 500) {
+    const vendidos =
+        data.reduce(
+            (total, boleto) => {
 
-        document.getElementById("total").textContent =
+                return total +
+                    Number(
+                        boleto.Cantidad
+                    );
+
+            },
+            0
+        );
+
+
+    if (
+        vendidos + cantidad >
+        500
+    ) {
+
+        document.getElementById(
+            "total"
+        ).textContent =
             "NO DISPONIBLE";
 
         return;
     }
 
-    const boletos100 = Math.max(
-        0,
-        Math.min(
-            cantidad,
-            100 - vendidos
-        )
-    );
 
     const boletos150 =
-        cantidad - boletos100;
+        Math.max(
+            0,
+            Math.min(
+                cantidad,
+                100 - vendidos
+            )
+        );
+
+
+    const boletos200 =
+        cantidad -
+        boletos150;
+
 
     const total =
-        (boletos100 * 100) +
-        (boletos150 * 150);
+        (boletos150 * 150) +
+        (boletos200 * 200);
 
-    document.getElementById("total").textContent =
+
+    document.getElementById(
+        "total"
+    ).textContent =
         total;
+
 }
 
-        // Guardar boleto
 
-        async function continuarPago() {
+// =========================
+// CONTINUAR AL PAGO
+// =========================
 
-            const nombre =
-                document.getElementById("nombre").value.trim();
-
-            const correo =
-                document.getElementById("correo").value.trim();
-
-            const telefono =
-                document.getElementById("telefono").value.trim();
-
-
-            if (!nombre || !correo || !telefono) {
-
-                alert("Por favor completa todos tus datos.");
-
-                return;
-            }
-const referencia = "HF-" + Math.floor(100000 + Math.random() * 900000);
-
-alert("Tu referencia de pago es: " + referencia);
-document.getElementById("referenciaPago").textContent = referencia;
-document.getElementById("instruccionesPago").style.display = "block";
-
-            const total = cantidad * 100;
-
-
-const { data, error } = await supabaseClient
-    .rpc("registrar_boleto", {
-        p_nombre: nombre,
-        p_correo: correo,
-        p_telefono: telefono,
-        p_cantidad: cantidad,
-        p_referencia: referencia
-    });
-console.log("BOLETO CREADO:", data);
-
-            if (error) {
-
-                console.error("ERROR SUPABASE:", error);
-
-                alert(
-                    "Error al guardar el boleto:\n\n" +
-                    error.message
-                );
-
-                return;
-            }
-
-
-            console.log("BOLETO GUARDADO:", data);
-
-            alert(
-                "🎃 ¡Boleto registrado correctamente!"
-            );
-
-        }
-function avisarWhatsApp() {
-    const referencia =
-        document.getElementById("referenciaPago").textContent;
+async function continuarPago() {
 
     const nombre =
-        document.getElementById("nombre").value.trim();
+        document.getElementById(
+            "nombre"
+        ).value.trim();
+
+
+    const correo =
+        document.getElementById(
+            "correo"
+        ).value.trim();
+
+
+    const telefono =
+        document.getElementById(
+            "telefono"
+        ).value.trim();
+
+
+    if (
+        !nombre ||
+        !correo ||
+        !telefono
+    ) {
+
+        alert(
+            "Por favor completa todos tus datos."
+        );
+
+        return;
+    }
+
+
+    const referencia =
+        "DF-" +
+        Math.floor(
+            100000 +
+            Math.random() *
+            900000
+        );
+
+
+    document.getElementById(
+        "referenciaPago"
+    ).textContent =
+        referencia;
+
+
+    document.getElementById(
+        "instruccionesPago"
+    ).style.display =
+        "block";
+
+
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .rpc(
+            "registrar_boleto",
+            {
+                p_nombre: nombre,
+                p_correo: correo,
+                p_telefono: telefono,
+                p_cantidad: cantidad,
+                p_referencia: referencia
+            }
+        );
+
+
+    console.log(
+        "BOLETO CREADO:",
+        data
+    );
+
+
+    if (error) {
+
+        console.error(
+            "ERROR SUPABASE:",
+            error
+        );
+
+
+        alert(
+            "Error al guardar el boleto:\n\n" +
+            error.message
+        );
+
+
+        return;
+    }
+
+
+    alert(
+        "👹 ¡Solicitud registrada!\n\n" +
+        "Tu referencia es: " +
+        referencia +
+        "\n\n" +
+        "Realiza la transferencia y después pulsa " +
+        "\"Ya hice mi transferencia\"."
+    );
+
+}
+
+
+// =========================
+// AVISAR POR WHATSAPP
+// =========================
+
+function avisarWhatsApp() {
+
+    const referencia =
+        document.getElementById(
+            "referenciaPago"
+        ).textContent;
+
+
+    const nombre =
+        document.getElementById(
+            "nombre"
+        ).value.trim();
+
 
     const mensaje =
-        "Hola, ya hice mi transferencia para Halloween Fest.%0A%0A" +
-        "Nombre: " + nombre + "%0A" +
-        "Referencia: " + referencia + "%0A%0A" +
-        "Quedo pendiente de la confirmación.";
+        `Hola, ya hice mi transferencia para Demon Fest.
 
-    const numero = "5216711230153";
+Nombre: ${nombre}
+Referencia: ${referencia}
+
+Quedo pendiente de la confirmación de mi boleto.`;
+
+
+    const numero =
+        "5216711230153";
+
 
     window.open(
-        "https://wa.me/" + numero + "?text=" + mensaje,
+        "https://wa.me/" +
+        numero +
+        "?text=" +
+        encodeURIComponent(
+            mensaje
+        ),
         "_blank"
     );
+
 }
-    </script>
+
+
+// =========================
+// INICIO
+// =========================
+
+actualizarDisponibles();
+
+actualizarTotal();
+
+</script>
 
 </body>
+
 </html>
