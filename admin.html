@@ -502,77 +502,101 @@ async function cargarEstadisticas() {
 
         async function autorizar(id) {
 
-            const confirmar =
-                confirm(
-                    "¿Confirmaste que este pago ya fue recibido?"
-                );
+    const confirmar =
+        confirm(
+            "¿Confirmaste que este pago ya fue recibido?"
+        );
 
+    if (!confirmar) {
+        return;
+    }
 
-            if (!confirmar) {
-                return;
-            }
+    const {
+        data: boleto,
+        error: errorBusqueda
+    } = await supabaseClient
+        .from("Boletos")
+        .select("*")
+        .eq("id", id)
+        .single();
 
+    if (errorBusqueda || !boleto) {
 
-            const {
-                data: boleto,
-                error: errorBusqueda
-            } = await supabaseClient
+        alert(
+            "❌ No se pudo encontrar el boleto."
+        );
 
-                .from("Boletos")
+        return;
+    }
 
-                .select("*")
+    // Abrimos WhatsApp inmediatamente
+    // para evitar que el navegador lo bloquee
 
-                .eq("id", id)
+    let telefono =
+        String(boleto.Telefono)
+            .replace(/\D/g, "");
 
-                .single();
+    if (telefono.length === 10) {
+        telefono = "52" + telefono;
+    }
 
+    const boletoUrl =
+        "https://yedrix26.github.io/Halloween-Fest/ticket.html?id=" +
+        boleto.id;
 
-            if (errorBusqueda || !boleto) {
+    const mensaje =
+        `🎃 ¡Tu boleto para Halloween Fest está confirmado!
 
-                alert(
-                    "❌ No se pudo encontrar el boleto."
-                );
+🎟️ Boleto #${boleto.id}
+👤 Nombre: ${boleto.Nombre}
+🎫 Cantidad: ${boleto.Cantidad}
 
-                return;
-            }
+👉 ABRIR MI BOLETO:
+${boletoUrl}`;
 
+    const whatsappUrl =
+        "https://wa.me/" +
+        telefono +
+        "?text=" +
+        encodeURIComponent(mensaje);
 
-            const { error } =
-                await supabaseClient
+    const ventanaWhatsApp =
+        window.open(
+            whatsappUrl,
+            "_blank"
+        );
 
-                    .from("Boletos")
+    const { error } =
+        await supabaseClient
+            .from("Boletos")
+            .update({
+                Estado: "Confirmado"
+            })
+            .eq("id", id);
 
-                    .update({
-                        Estado: "Confirmado"
-                    })
+    if (error) {
 
-                    .eq("id", id);
+        console.error(error);
 
+        alert(
+            "❌ Error al autorizar."
+        );
 
-            if (error) {
-
-                console.error(error);
-
-                alert(
-                    "❌ Error al autorizar."
-                );
-
-                return;
-            }
-
-
-            alert(
-                "🎃 ¡Pago autorizado!"
-            );
-
-
-            enviarWhatsApp(boleto);
-
-
-            cargarBoletos();
-
+        // Si hubo error, cerramos la ventana
+        if (ventanaWhatsApp) {
+            ventanaWhatsApp.close();
         }
 
+        return;
+    }
+
+    alert(
+        "🎃 ¡Pago autorizado!"
+    );
+
+    cargarBoletos();
+
+}
 
 
         // =========================
@@ -581,52 +605,42 @@ async function cargarEstadisticas() {
 
         function enviarWhatsApp(boleto) {
 
-            const boletoUrl =
-    "https://yedrix26.github.io/Halloween-Fest/ticket.html?id=" + boleto.id;
+    const boletoUrl =
+        "https://yedrix26.github.io/Halloween-Fest/ticket.html?id=" +
+        boleto.id;
 
+    let telefono =
+        String(boleto.Telefono)
+            .replace(/\D/g, "");
 
-            let telefono =
-                String(boleto.Telefono)
-                    .replace(/\D/g, "");
+    if (telefono.length === 10) {
+        telefono = "52" + telefono;
+    }
 
+    const mensaje =
+        `🎃 ¡Tu boleto para Halloween Fest está confirmado!
 
-            // Si el número tiene 10 dígitos,
-            // agregamos México
+🎟️ Boleto #${boleto.id}
+👤 Nombre: ${boleto.Nombre}
+🎫 Cantidad: ${boleto.Cantidad}
 
-            if (telefono.length === 10) {
-                telefono = "52" + telefono;
-            }
+👉 ABRIR MI BOLETO:
+${boletoUrl}`;
 
+    const mensajeCodificado =
+        encodeURIComponent(mensaje);
 
-            const mensaje =
-                "🎃 ¡Tu boleto para Halloween Fest está confirmado!%0A%0A" +
+    const whatsappUrl =
+        "https://wa.me/" +
+        telefono +
+        "?text=" +
+        mensajeCodificado;
 
-                "🎟️ Boleto #" +
-                boleto.id +
-                "%0A" +
-
-                "👤 Nombre: " +
-                boleto.Nombre +
-                "%0A" +
-
-                "🎫 Cantidad: " +
-                boleto.Cantidad +
-                "%0A%0A" +
-
-                "👉 ABRIR MI BOLETO:%0A" +
-
-                boletoUrl;
-
-
-            window.open(
-                "https://wa.me/" +
-                telefono +
-                "?text=" +
-                mensaje,
-                "_blank"
-            );
-
-        }
+    window.open(
+        whatsappUrl,
+        "_blank"
+    );
+}
 
 
 
