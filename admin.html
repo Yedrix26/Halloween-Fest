@@ -70,6 +70,33 @@
         .seccion {
             margin-top: 30px;
         }
+.estadisticas {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    max-width: 700px;
+    margin: 20px auto 30px;
+}
+
+.estadistica {
+    background: #151515;
+    border: 1px solid #333;
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+}
+
+.estadistica h3 {
+    margin: 0 0 10px;
+    font-size: 16px;
+}
+
+.estadistica p {
+    margin: 0;
+    font-size: 30px;
+    font-weight: bold;
+}
+
     </style>
 </head>
 
@@ -110,6 +137,34 @@
     <!-- PANEL -->
 
     <div id="panel" style="display:none;">
+        <div class="estadisticas">
+
+    <div class="estadistica">
+        <h3>🎟️ BOLETOS VENDIDOS</h3>
+        <p id="estadisticaVendidos">0</p>
+    </div>
+
+    <div class="estadistica">
+        <h3>🟢 DISPONIBLES</h3>
+        <p id="estadisticaDisponibles">500</p>
+    </div>
+
+    <div class="estadistica">
+        <h3>💰 INGRESOS</h3>
+        <p id="estadisticaIngresos">$0</p>
+    </div>
+
+    <div class="estadistica">
+        <h3>🚪 ENTRADAS USADAS</h3>
+        <p id="estadisticaUsados">0</p>
+    </div>
+
+    <div class="estadistica">
+        <h3>🟡 PAGOS PENDIENTES</h3>
+        <p id="estadisticaPendientes">0</p>
+    </div>
+
+</div>
 
         <button
     class="botonSecundario"
@@ -237,12 +292,103 @@
 
         async function cargarBoletos() {
 
-            cargarPendientes();
+    cargarPendientes();
 
-            cargarConfirmados();
+    cargarConfirmados();
+
+    cargarEstadisticas();
+
+}
+// =========================
+// ESTADÍSTICAS
+// =========================
+
+async function cargarEstadisticas() {
+
+    const { data, error } =
+        await supabaseClient
+            .from("Boletos")
+            .select("Cantidad, Total, Estado");
+
+    if (error) {
+
+        console.error(
+            "ERROR ESTADÍSTICAS:",
+            error
+        );
+
+        return;
+    }
+
+    let vendidos = 0;
+    let ingresos = 0;
+    let usados = 0;
+    let pendientes = 0;
+
+    data.forEach(boleto => {
+
+        const cantidad =
+            Number(boleto.Cantidad) || 0;
+
+        const total =
+            Number(boleto.Total) || 0;
+
+        if (
+            boleto.Estado === "Confirmado" ||
+            boleto.Estado === "Usado"
+        ) {
+
+            vendidos += cantidad;
+            ingresos += total;
 
         }
 
+        if (boleto.Estado === "Usado") {
+
+            usados += cantidad;
+
+        }
+
+        if (boleto.Estado === "Pendiente") {
+
+            pendientes += cantidad;
+
+        }
+
+    });
+
+    const disponibles =
+        500 - vendidos;
+
+
+    document.getElementById(
+        "estadisticaVendidos"
+    ).textContent = vendidos;
+
+
+    document.getElementById(
+        "estadisticaDisponibles"
+    ).textContent =
+        Math.max(0, disponibles);
+
+
+    document.getElementById(
+        "estadisticaIngresos"
+    ).textContent =
+        "$" +
+        ingresos.toLocaleString("es-MX");
+
+
+    document.getElementById(
+        "estadisticaUsados"
+    ).textContent = usados;
+
+
+    document.getElementById(
+        "estadisticaPendientes"
+    ).textContent = pendientes;
+
+}
 
 
         // =========================
