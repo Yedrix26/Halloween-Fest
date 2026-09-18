@@ -24,6 +24,9 @@
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <!-- Configuración -->
+    <script src="config.js"></script>
+
     <style>
 
         * {
@@ -165,6 +168,7 @@
         .button:hover {
             transform: translateY(-2px);
             background: #f00000;
+
             box-shadow:
                 0 0 30px rgba(255,0,0,.7);
         }
@@ -238,6 +242,7 @@
         .card:hover {
             transform: translateY(-5px);
             border-color: #b30000;
+
             box-shadow:
                 0 0 25px rgba(255,0,0,.15);
         }
@@ -352,7 +357,9 @@
 
         input:focus {
             border-color: #d40000;
-            box-shadow: 0 0 10px rgba(255,0,0,.15);
+
+            box-shadow:
+                0 0 10px rgba(255,0,0,.15);
         }
 
         input::placeholder {
@@ -677,6 +684,7 @@
 
         <div class="card">
             <h3>🎧 DJs EN VIVO</h3>
+
             <p>
                 Música toda la noche y ambiente de festival.
             </p>
@@ -684,6 +692,7 @@
 
         <div class="card">
             <h3>👹 CONCURSO</h3>
+
             <p>
                 Ven con tu mejor disfraz y demuestra quién domina la noche.
             </p>
@@ -691,6 +700,7 @@
 
         <div class="card">
             <h3>🔥 DEMON EXPERIENCE</h3>
+
             <p>
                 Una noche diseñada para que Halloween no vuelva a ser igual.
             </p>
@@ -727,612 +737,11 @@
                 $150
             </div>
 
-            <p>MXN por boleto</p>
+            <p>
+                MXN por boleto
+            </p>
 
         </div>
 
 
-        <div class="precio-card">
-
-            <div class="precio-label">
-                DESPUÉS DEL BOLETO 100
-            </div>
-
-            <div class="precio">
-                $200
-            </div>
-
-            <p>MXN por boleto</p>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- =========================
-     COMPRA
-========================= -->
-
-<section
-    class="section"
-    id="compra"
->
-
-    <h2 class="section-title">
-        CONSEGUIR BOLETO
-    </h2>
-
-    <p class="section-subtitle">
-        PAGO ÚNICAMENTE POR TRANSFERENCIA BANCARIA
-    </p>
-
-
-    <div class="card purchase">
-
-        <div class="purchase-title">
-            🎟️ DATOS DEL BOLETO
-        </div>
-
-
-        <input
-            id="nombre"
-            type="text"
-            placeholder="Nombre completo"
-        >
-
-
-        <input
-            id="correo"
-            type="email"
-            placeholder="Correo electrónico"
-        >
-
-
-        <input
-            id="telefono"
-            type="tel"
-            placeholder="Número de teléfono"
-        >
-
-
-        <p class="quantity-title">
-            Cantidad de boletos
-        </p>
-
-
-        <div class="quantity">
-
-            <button
-                type="button"
-                onclick="cambiarCantidad(-1)"
-            >
-                −
-            </button>
-
-            <span id="cantidad">
-                1
-            </span>
-
-            <button
-                type="button"
-                onclick="cambiarCantidad(1)"
-            >
-                +
-            </button>
-
-        </div>
-
-
-        <div class="total-box">
-
-            <div class="total-label">
-                TOTAL
-            </div>
-
-            <div>
-                $<span id="total">150</span> MXN
-            </div>
-
-        </div>
-
-
-        <p class="aviso-precio">
-            Los primeros 100 boletos cuestan $150 MXN.
-            Después el precio será de $200 MXN.
-        </p>
-
-
-        <button
-            type="button"
-            class="button"
-            onclick="continuarPago()"
-        >
-            💸 CONTINUAR AL PAGO
-        </button>
-
-    </div>
-
-
-    <!-- RIFA -->
-
-    <div class="rifa">
-
-        <h3>
-            🎁 ¡TU BOLETO PARTICIPA EN LA RIFA!
-        </h3>
-
-        <p>
-            Con tu compra participas automáticamente
-            para ganar increíbles premios durante el evento.
-            🏆 ¡Mucha suerte!
-        </p>
-
-    </div>
-
-
-    <!-- TRANSFERENCIA -->
-
-    <div
-        id="instruccionesPago"
-        style="display:none;"
-    >
-
-        <h2>
-            💸 REALIZA TU TRANSFERENCIA
-        </h2>
-
-        <p>
-            Tu boleto quedará pendiente hasta que
-            confirmemos el pago.
-        </p>
-
-        <div class="pago-pasos">
-
-            <strong>1.</strong>
-            Copia la referencia de pago.<br>
-
-            <strong>2.</strong>
-            Realiza la transferencia por el total indicado.<br>
-
-            <strong>3.</strong>
-            Pulsa “Ya hice mi transferencia”.<br>
-
-            <strong>4.</strong>
-            Verificaremos tu pago y te enviaremos
-            tu boleto por WhatsApp.
-
-        </div>
-
-
-        <div class="pago-dato">
-            <strong>Banco:</strong>
-            Próximamente
-        </div>
-
-
-        <div class="pago-dato">
-            <strong>Titular:</strong>
-            Hector Alejandro Perez Beltran
-        </div>
-
-
-        <div class="pago-dato">
-            <strong>Cuenta / CLABE:</strong>
-            Próximamente
-        </div>
-
-
-        <div class="referencia">
-
-            REFERENCIA:
-
-            <span id="referenciaPago"></span>
-
-        </div>
-
-
-        <button
-            type="button"
-            class="button"
-            onclick="avisarWhatsApp()"
-        >
-            📲 YA HICE MI TRANSFERENCIA
-        </button>
-
-    </div>
-
-
-    <p class="disponibles">
-
-        🔥 Quedan
-        <span id="disponibles">500</span>
-        boletos disponibles
-
-    </p>
-
-</section>
-
-
-<!-- =========================
-     FOOTER
-========================= -->
-
-<div class="footer">
-
-    <strong>DEMON FEST</strong>
-    © 2026
-
-</div>
-
-
-<!-- =========================
-     JAVASCRIPT
-========================= -->
-
-<script>
-
-const supabaseClient =
-    supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-    );
-
-
-console.log(
-    "URL DE SUPABASE:",
-    SUPABASE_URL
-);
-
-
-// =========================
-// CANTIDAD
-// =========================
-
-let cantidad = 1;
-
-
-// =========================
-// DISPONIBILIDAD
-// =========================
-
-async function actualizarDisponibles() {
-
-    const {
-        data,
-        error
-    } = await supabaseClient
-        .from("Boletos")
-        .select("Cantidad")
-        .in(
-            "Estado",
-            ["Confirmado", "Usado"]
-        );
-
-
-    if (error) {
-
-        console.error(
-            "ERROR AL CONTAR BOLETOS:",
-            error
-        );
-
-        return;
-    }
-
-
-    const vendidos =
-        data.reduce(
-            (total, boleto) => {
-
-                return total +
-                    Number(
-                        boleto.Cantidad
-                    );
-
-            },
-            0
-        );
-
-
-    const disponibles =
-        500 - vendidos;
-
-
-    document.getElementById(
-        "disponibles"
-    ).textContent =
-        Math.max(
-            0,
-            disponibles
-        );
-
-}
-
-
-// =========================
-// CAMBIAR CANTIDAD
-// =========================
-
-function cambiarCantidad(numero) {
-
-    cantidad += numero;
-
-
-    if (cantidad < 1) {
-        cantidad = 1;
-    }
-
-
-    if (cantidad > 10) {
-        cantidad = 10;
-    }
-
-
-    document.getElementById(
-        "cantidad"
-    ).textContent =
-        cantidad;
-
-
-    actualizarTotal();
-
-}
-
-
-// =========================
-// CALCULAR TOTAL
-// =========================
-
-async function actualizarTotal() {
-
-    const {
-        data,
-        error
-    } = await supabaseClient
-        .from("Boletos")
-        .select("Cantidad")
-        .in(
-            "Estado",
-            ["Confirmado", "Usado"]
-        );
-
-
-    if (error) {
-
-        console.error(
-            "ERROR AL CALCULAR PRECIO:",
-            error
-        );
-
-        return;
-    }
-
-
-    const vendidos =
-        data.reduce(
-            (total, boleto) => {
-
-                return total +
-                    Number(
-                        boleto.Cantidad
-                    );
-
-            },
-            0
-        );
-
-
-    if (
-        vendidos + cantidad >
-        500
-    ) {
-
-        document.getElementById(
-            "total"
-        ).textContent =
-            "NO DISPONIBLE";
-
-        return;
-    }
-
-
-    const boletos150 =
-        Math.max(
-            0,
-            Math.min(
-                cantidad,
-                100 - vendidos
-            )
-        );
-
-
-    const boletos200 =
-        cantidad -
-        boletos150;
-
-
-    const total =
-        (boletos150 * 150) +
-        (boletos200 * 200);
-
-
-    document.getElementById(
-        "total"
-    ).textContent =
-        total;
-
-}
-
-
-// =========================
-// CONTINUAR AL PAGO
-// =========================
-
-async function continuarPago() {
-
-    const nombre =
-        document.getElementById(
-            "nombre"
-        ).value.trim();
-
-
-    const correo =
-        document.getElementById(
-            "correo"
-        ).value.trim();
-
-
-    const telefono =
-        document.getElementById(
-            "telefono"
-        ).value.trim();
-
-
-    if (
-        !nombre ||
-        !correo ||
-        !telefono
-    ) {
-
-        alert(
-            "Por favor completa todos tus datos."
-        );
-
-        return;
-    }
-
-
-    const referencia =
-        "DF-" +
-        Math.floor(
-            100000 +
-            Math.random() *
-            900000
-        );
-
-
-    document.getElementById(
-        "referenciaPago"
-    ).textContent =
-        referencia;
-
-
-    document.getElementById(
-        "instruccionesPago"
-    ).style.display =
-        "block";
-
-
-    const {
-        data,
-        error
-    } = await supabaseClient
-        .rpc(
-            "registrar_boleto",
-            {
-                p_nombre: nombre,
-                p_correo: correo,
-                p_telefono: telefono,
-                p_cantidad: cantidad,
-                p_referencia: referencia
-            }
-        );
-
-
-    console.log(
-        "BOLETO CREADO:",
-        data
-    );
-
-
-    if (error) {
-
-        console.error(
-            "ERROR SUPABASE:",
-            error
-        );
-
-
-        alert(
-            "Error al guardar el boleto:\n\n" +
-            error.message
-        );
-
-
-        return;
-    }
-
-
-    alert(
-        "👹 ¡Solicitud registrada!\n\n" +
-        "Tu referencia es: " +
-        referencia +
-        "\n\n" +
-        "Realiza la transferencia y después pulsa " +
-        "\"Ya hice mi transferencia\"."
-    );
-
-}
-
-
-// =========================
-// AVISAR POR WHATSAPP
-// =========================
-
-function avisarWhatsApp() {
-
-    const referencia =
-        document.getElementById(
-            "referenciaPago"
-        ).textContent;
-
-
-    const nombre =
-        document.getElementById(
-            "nombre"
-        ).value.trim();
-
-
-    const mensaje =
-        `Hola, ya hice mi transferencia para Demon Fest.
-
-Nombre: ${nombre}
-Referencia: ${referencia}
-
-Quedo pendiente de la confirmación de mi boleto.`;
-
-
-    const numero =
-        "5216711230153";
-
-
-    window.open(
-        "https://wa.me/" +
-        numero +
-        "?text=" +
-        encodeURIComponent(
-            mensaje
-        ),
-        "_blank"
-    );
-
-}
-
-
-// =========================
-// INICIO
-// =========================
-
-actualizarDisponibles();
-
-actualizarTotal();
-
-
-
-</script>
-
-</body>
-
-</html>
+        <div class="precio
