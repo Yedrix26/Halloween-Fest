@@ -99,19 +99,24 @@
             text-transform: uppercase;
         }
 
-        h1 {
-            font-family: "Creepster", cursive;
-            font-size: clamp(80px, 17vw, 190px);
-            line-height: .75;
-            letter-spacing: 5px;
+        .logo-demon {
+    width: min(430px, 75vw);
+    margin: 20px auto 15px;
 
-            color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-            text-shadow:
-                0 0 8px #ff1a00,
-                0 0 25px #ff1a00,
-                0 0 55px rgba(255,0,0,.7);
-        }
+.logo-demon img {
+    width: 100%;
+    height: auto;
+    display: block;
+
+    filter:
+        drop-shadow(0 0 6px rgba(255, 0, 0, .8))
+        drop-shadow(0 0 15px rgba(255, 0, 0, .4));
+}
 
         .hero-subtitle {
             margin-top: 35px;
@@ -591,11 +596,15 @@
         <div class="tag">
             ☠️ EL EVENTO DEL AÑO ☠️
         </div>
+<div class="logo-demon">
+    <img
+        src="demon-logo.png"
+        alt="DEMON"
+    >
+</div>
 
-        <h1>
-            DEMON<br>
-            FEST
-        </h1>
+
+       
 
         <p class="hero-subtitle">
             GOOD PEOPLE. BAD HABITS.
@@ -631,36 +640,7 @@
      ORGANIZADORES
 ========================= -->
 
-<section class="section">
 
-    <h2 class="section-title">
-        LOS QUE LO HACEN POSIBLE
-    </h2>
-
-    <p class="section-subtitle">
-        ORGANIZACIÓN DEMON FEST
-    </p>
-
-    <div class="cards">
-
-        <div class="card">
-            <h3>Francisco</h3>
-            <p>Organizador</p>
-        </div>
-
-        <div class="card">
-            <h3>Coffi</h3>
-            <p>Organizador</p>
-        </div>
-
-        <div class="card">
-            <h3>Alejandro</h3>
-            <p>Organizador</p>
-        </div>
-
-    </div>
-
-</section>
 
 
 <!-- =========================
@@ -699,7 +679,29 @@
     </div>
 
 </section>
+<section class="section">
 
+    <h2 class="section-title">
+        ÚNETE A DEMON FEST
+    </h2>
+
+    <p class="section-subtitle">
+        Únete al grupo oficial y entérate de todo antes que nadie.
+    </p>
+
+    <a
+        href="https://chat.whatsapp.com/BMCjpUlwgAHCjmPNgUri4M"
+        target="_blank"
+        class="button"
+    >
+        💬 ENTRAR AL GRUPO DE WHATSAPP
+    </a>
+
+    <p style="margin-top:20px; color:#888; font-size:13px;">
+        Anuncios • Dinámicas • Novedades • Información del evento
+    </p>
+
+</section>
 
 <!-- =========================
      PRECIOS
@@ -908,7 +910,7 @@
 
         <div class="pago-dato">
             <strong>Banco:</strong>
-            Próximamente
+            BBVA
         </div>
 
 
@@ -920,7 +922,7 @@
 
         <div class="pago-dato">
             <strong>Cuenta / CLABE:</strong>
-            Próximamente
+            4152 3139 5483 0167
         </div>
 
 
