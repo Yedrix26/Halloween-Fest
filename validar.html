@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Validar boleto - Halloween Fest</title>
+    <title>Validar boleto - Demon Fest</title>
 
     <style>
         body {
@@ -55,7 +55,7 @@
 
     <div class="contenedor">
 
-        <h1>🎃 HALLOWEEN FEST</h1>
+        <h1>🎃 Demon Fest</h1>
 
         <h2>🔎 Validación de boleto</h2>
 
@@ -121,7 +121,7 @@ const boleto = data[0];
             }
 
 
-            if (data.Estado !== "Confirmado") {
+            if (boleto.estado !== "Confirmado") {
 
                 mostrarError(
                     "❌ BOLETO NO CONFIRMADO"
@@ -131,7 +131,7 @@ const boleto = data[0];
             }
 
 
-            mostrarValido(data);
+            mostrarValido(boleto);
 
         }
 
@@ -166,7 +166,7 @@ const boleto = data[0];
                 </div>
 
                 <p style="margin-top:20px;">
-                    🎃 ¡Bienvenido a Halloween Fest!
+                    🎃 ¡Bienvenido a Demon Fest!
                 </p>
 
             `;
