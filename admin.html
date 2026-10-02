@@ -172,7 +172,12 @@
 >
     📷 ESCANEAR ENTRADA
 </button>
-
+           <button
+    class="botonSecundario"
+    onclick="realizarRifa()"
+>
+    🎁 REALIZAR RIFA
+</button>
         <button
             class="botonSecundario"
             onclick="cerrarSesion()"
@@ -769,7 +774,36 @@ ${boletoUrl}`;
             location.reload();
 
         }
+     async function realizarRifa() {
+    const confirmar = confirm(
+        "🎁 ¿REALIZAR LA RIFA?\n\n" +
+        "Se elegirá aleatoriamente una participación entre todos los boletos confirmados.\n\n" +
+        "Esta acción es solo para realizar el sorteo."
+    );
 
+    if (!confirmar) return;
+
+    try {
+        const { data, error } = await supabase.rpc("realizar_rifa");
+
+        if (error) {
+            console.error(error);
+            alert("❌ Error al realizar la rifa:\n" + error.message);
+            return;
+        }
+
+        alert(
+            "🎉 ¡TENEMOS GANADOR!\n\n" +
+            "🏆 Nombre: " + data.nombre + "\n" +
+            "🎟️ Referencia: " + data.referencia + "\n" +
+            "🎫 Boletos comprados: " + data.cantidad
+        );
+
+    } catch (error) {
+        console.error(error);
+        alert("❌ Ocurrió un error al realizar la rifa.");
+    }
+}
     </script>
 
 </body>
