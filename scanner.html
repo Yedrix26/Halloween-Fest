@@ -253,12 +253,10 @@ verificarSesion().then(function(autorizado) {
 
 async function verificarQR(codigo) {
 
-
     console.log(
         "QR LEÍDO:",
         codigo
     );
-
 
     try {
 
@@ -267,29 +265,27 @@ async function verificarQR(codigo) {
             try {
                 await scanner.stop();
             } catch (e) {}
-
         }
 
 
         // ==================================================
-        // LEER ID DEL QR
+        // LEER TOKEN DEL QR
         // ==================================================
 
         const parametros =
             new URL(codigo);
 
-
-        const id =
-            parametros.searchParams.get("id");
+        const token =
+            parametros.searchParams.get("token");
 
 
         console.log(
-            "ID DEL QR:",
-            id
+            "TOKEN DEL QR:",
+            token
         );
 
 
-        if (!id) {
+        if (!token) {
 
             mostrarError(
                 "❌ QR NO VÁLIDO"
@@ -300,7 +296,7 @@ async function verificarQR(codigo) {
 
 
         // ==================================================
-        // MISMA CONSULTA QUE VALIDAR.HTML
+        // BUSCAR BOLETO POR TOKEN
         // ==================================================
 
         const { data, error } =
@@ -308,7 +304,7 @@ async function verificarQR(codigo) {
                 .rpc(
                     "obtener_boleto",
                     {
-                        p_id: id
+                        p_token: token
                     }
                 );
 
@@ -357,53 +353,40 @@ async function verificarQR(codigo) {
                 "❌ BOLETO NO VÁLIDO"
             );
 
-
             return;
         }
 
 
-        // ==================================================
-        // MISMA FORMA QUE VALIDAR.HTML
-        // ==================================================
-
         const boleto = data[0];
-
 
         boletoActual = boleto;
 
 
-        console.log(
-            "BOLETO:",
-            boleto
-        );
-
-
         // ==================================================
         // CAMPOS
-        // Compatible con ambas formas
         // ==================================================
 
         const nombre =
-            boleto.Nombre ??
             boleto.nombre ??
+            boleto.Nombre ??
             "";
 
 
         const cantidad =
-            boleto.Cantidad ??
             boleto.cantidad ??
+            boleto.Cantidad ??
             "";
 
 
         const total =
-            boleto.Total ??
             boleto.total ??
+            boleto.Total ??
             "";
 
 
         const estado =
-            boleto.Estado ??
             boleto.estado ??
+            boleto.Estado ??
             "";
 
 
@@ -412,7 +395,6 @@ async function verificarQR(codigo) {
         // ==================================================
 
         if (estado === "Usado") {
-
 
             document.getElementById(
                 "resultado"
@@ -459,7 +441,6 @@ async function verificarQR(codigo) {
         // ==================================================
 
         if (estado === "Confirmado") {
-
 
             document.getElementById(
                 "resultado"
@@ -510,29 +491,19 @@ async function verificarQR(codigo) {
         }
 
 
-        // ==================================================
-        // OTRO ESTADO
-        // ==================================================
-
         mostrarError(
             "❌ BOLETO NO CONFIRMADO"
         );
 
     }
 
-
     catch (error) {
-
 
         console.error(
             "ERROR REAL:",
             error
         );
 
-
-        // IMPORTANTE:
-        // Ya NO vamos a llamar esto "QR NO VÁLIDO".
-        // Así veremos el error verdadero.
 
         mostrarError(
             "❌ ERROR DEL SCANNER<br><br>" +
@@ -542,12 +513,6 @@ async function verificarQR(codigo) {
     }
 
 }
-
-
-// ======================================================
-// MARCAR COMO USADO
-// ======================================================
-
 async function marcarComoUsado() {
 
 

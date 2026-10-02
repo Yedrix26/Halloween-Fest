@@ -79,62 +79,62 @@
 
         async function validarBoleto() {
 
-            const parametros =
-                new URLSearchParams(window.location.search);
+    const parametros =
+        new URLSearchParams(window.location.search);
 
-            const id =
-                parametros.get("id");
-
-
-            if (!id) {
-
-                mostrarError(
-                    "❌ No se encontró el ID del boleto."
-                );
-
-                return;
-            }
+    const token =
+        parametros.get("token");
 
 
-            const { data, error } = await supabaseClient
-    .rpc("obtener_boleto", {
-        p_id: id
-    });
+    if (!token) {
 
-if (error || !data || data.length === 0) {
-    mostrarError("❌ BOLETO NO VÁLIDO");
-    return;
+        mostrarError(
+            "❌ No se encontró el token del boleto."
+        );
+
+        return;
+    }
+
+
+    const { data, error } =
+        await supabaseClient
+            .rpc("obtener_boleto", {
+                p_token: token
+            });
+
+
+    if (
+        error ||
+        !data ||
+        data.length === 0
+    ) {
+
+        console.error(error);
+
+        mostrarError(
+            "❌ BOLETO NO VÁLIDO"
+        );
+
+        return;
+    }
+
+
+    const boleto = data[0];
+
+
+    if (boleto.estado !== "Confirmado") {
+
+        mostrarError(
+            "❌ BOLETO NO CONFIRMADO"
+        );
+
+        return;
+    }
+
+
+    mostrarValido(boleto);
+
 }
-
-const boleto = data[0];
-
-
-            if (error || !data) {
-
-                console.error(error);
-
-                mostrarError(
-                    "❌ BOLETO NO VÁLIDO"
-                );
-
-                return;
-            }
-
-
-            if (boleto.estado !== "Confirmado") {
-
-                mostrarError(
-                    "❌ BOLETO NO CONFIRMADO"
-                );
-
-                return;
-            }
-
-
-            mostrarValido(boleto);
-
-        }
-
 
 
         function mostrarValido(boleto) {

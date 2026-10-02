@@ -126,9 +126,8 @@ const supabaseClient = supabase.createClient(
 
 async function cargarBoleto() {
 
-
     // -----------------------------------------------
-    // OBTENER ID DE LA URL
+    // OBTENER TOKEN DE LA URL
     // -----------------------------------------------
 
     const parametros =
@@ -136,12 +135,11 @@ async function cargarBoleto() {
             window.location.search
         );
 
+    const token =
+        parametros.get("token");
 
-    const id =
-        parametros.get("id");
 
-
-    if (!id) {
+    if (!token) {
 
         document.body.innerHTML =
             "<h1>❌ Boleto no encontrado</h1>";
@@ -151,13 +149,13 @@ async function cargarBoleto() {
 
 
     console.log(
-        "ID DEL BOLETO:",
-        id
+        "TOKEN DEL BOLETO:",
+        token
     );
 
 
     // -----------------------------------------------
-    // CONSULTAR BOLETO
+    // CONSULTAR BOLETO POR TOKEN
     // -----------------------------------------------
 
     const { data, error } =
@@ -165,7 +163,7 @@ async function cargarBoleto() {
             .rpc(
                 "obtener_boleto",
                 {
-                    p_id: id
+                    p_token: token
                 }
             );
 
@@ -205,56 +203,35 @@ async function cargarBoleto() {
     document.getElementById(
         "idBoleto"
     ).textContent =
-        id;
+        boleto.id;
 
 
     document.getElementById(
         "nombre"
     ).textContent =
-        boleto.nombre ??
-        boleto.Nombre ??
-        "";
+        boleto.nombre ?? "";
 
 
     document.getElementById(
         "cantidad"
     ).textContent =
-        boleto.cantidad ??
-        boleto.Cantidad ??
-        "";
+        boleto.cantidad ?? "";
 
 
     document.getElementById(
         "total"
     ).textContent =
-        boleto.total ??
-        boleto.Total ??
-        "";
+        boleto.total ?? "";
 
 
     // =================================================
-    // GENERAR QR
+    // GENERAR QR SEGURO
     // =================================================
-    //
-    // IMPORTANTE:
-    // Usamos DIRECTAMENTE el ID de la URL.
-    //
-    // Si la página es:
-    //
-    // ticket.html?id=31
-    //
-    // el QR SIEMPRE será:
-    //
-    // validar.html?id=31
-    //
-    // Nunca dependerá de boleto.id.
-    // =================================================
-
 
     const urlValidacion =
         new URL(
-            "validar.html?id=" +
-            encodeURIComponent(id),
+            "validar.html?token=" +
+            encodeURIComponent(token),
             window.location.href
         ).href;
 

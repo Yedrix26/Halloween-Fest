@@ -546,8 +546,8 @@ async function cargarEstadisticas() {
     }
 
     const boletoUrl =
-        "https://yedrix26.github.io/Halloween-Fest/ticket.html?id=" +
-        boleto.id;
+    "https://yedrix26.github.io/Halloween-Fest/ticket.html?token=" +
+    encodeURIComponent(boleto.Token);
 
     const mensaje =
         `🎃 ¡Tu boleto para Demon Fest está confirmado!
@@ -611,8 +611,8 @@ ${boletoUrl}`;
         function enviarWhatsApp(boleto) {
 
     const boletoUrl =
-        "https://yedrix26.github.io/Halloween-Fest/ticket.html?id=" +
-        boleto.id;
+    "https://yedrix26.github.io/Halloween-Fest/ticket.html?token=" +
+    encodeURIComponent(boleto.Token);
 
     let telefono =
         String(boleto.Telefono)
