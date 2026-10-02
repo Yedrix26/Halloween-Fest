@@ -784,7 +784,7 @@ ${boletoUrl}`;
     if (!confirmar) return;
 
     try {
-        const { data, error } = await supabase.rpc("realizar_rifa");
+    const { data, error } = await supabaseClient.rpc("realizar_rifa");
 
         if (error) {
             console.error(error);
